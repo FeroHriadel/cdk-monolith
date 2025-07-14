@@ -17,15 +17,6 @@ namespace Api.Controllers;
 public class UsersController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper) : BaseApiController
 {
 
-    // Get Users - GET api/users
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserPublicInfo>>> GetUsers()
-    {
-        var users = await userManager.Users.ToListAsync();
-        var userDtos = mapper.Map<IEnumerable<UserPublicInfo>>(users);
-        return Ok(userDtos);
-    }
-
 
     // Get User by Id - GET api/users/{id}
     [HttpGet("{id:int}")]
@@ -76,8 +67,7 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
         // assign default role and create token
         await userManager.AddToRoleAsync(user, "User");
         var token = await tokenService.CreateTokenAsync(user);
-        var userDto = mapper.Map<UserPublicInfo>(user);
-
+        
         // respond with the created user and token
         var userLoginResponse = new UserLoginResponse
         {
