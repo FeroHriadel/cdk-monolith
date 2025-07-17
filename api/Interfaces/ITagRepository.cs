@@ -13,6 +13,7 @@ public interface ITagRepository
   Task<Tag> CreateAsync(TagCreate tagCreateDto, ClaimsPrincipal user);
   Task<IEnumerable<Tag>> GetAllAsync();
   Task<Tag?> GetByIdAsync(int id);
+  Task<Tag?> GetByNameAsync(string name);
   Task<Tag?> UpdateAsync(TagUpdate tagUpdateDto);
   Task<int> DeleteAsync(int id);
 }

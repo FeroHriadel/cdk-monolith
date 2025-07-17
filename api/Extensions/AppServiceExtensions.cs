@@ -16,6 +16,8 @@ public static class AppServiceExtensions
   {
     services.AddControllers();
     services.AddDbContext<DataContext>(options => options.UseMySQL(configuration.GetConnectionString("DefaultConnection")!));
+    services.AddMemoryCache();
+    services.AddScoped<ITagCacheService, TagCacheService>();
     services.AddCors();
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<ITokenService, TokenService>();

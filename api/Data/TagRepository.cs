@@ -44,6 +44,13 @@ public class TagRepository(DataContext context, ITokenService tokenService) : IT
   }
 
 
+  // GET TAG BY NAME
+  public async Task<Tag?> GetByNameAsync(string name)
+  {
+    return await context.Tags.FirstOrDefaultAsync(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+  }
+
+
   // UPDATE TAG
   public async Task<Tag?> UpdateAsync(TagUpdate tagUpdateDto)
   {
