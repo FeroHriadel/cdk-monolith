@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Api.Middleware;
+using Api.Dtos;
 
 
 
@@ -12,6 +13,19 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class BaseApiController : ControllerBase
 {
-    // This class can be used to define common functionality for all API controllers
-    // For example, you can add common methods, properties, or filters here that all API controllers will inherit.
+
+    // STANDARDIZED API RESPONSES
+
+    protected ActionResult<ApiResponse<T>> Success<T>(int statusCode, string message, T data = default)
+    {
+        var result = new ApiResponse<T>(statusCode, message, data);
+        return Ok(result);
+    }
+
+    protected ActionResult<ApiResponse<T>> Error<T>(int statusCode, string message)
+    {
+        var result = new ApiResponse<T>(statusCode, message);
+        return StatusCode(statusCode, result);
+    }
+
 }

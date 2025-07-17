@@ -7,68 +7,70 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-
-
 namespace Api.Controllers;
-
-
 
 [Authorize]
 public class UsersController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper) : BaseApiController
 {
 
-
-    // Get User by Id - GET api/users/{id}
+    // GET USER BY ID- GET api/users/{id}
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<UserPublicInfo>> GetUserById(int id)
+    public async Task<ActionResult<ApiResponse<UserPublicInfo>>> GetUserById(int id)
     {
         var user = await userManager.FindByIdAsync(id.ToString());
-        if (user == null) return NotFound();
+        if (user == null)
+            return Error<UserPublicInfo>(404, "User not found");
 
         var userDto = mapper.Map<UserPublicInfo>(user);
-        return Ok(userDto);
+        return Success(200, "User found", userDto);
     }
 
 
-    // Get User by Username - GET api/users/username/{username}
+    // GET USER BY USERNAME - GET api/users/username/{username}
     [HttpGet("username/{username}")]
-    public async Task<ActionResult<UserPublicInfo>> GetUserByUsername(string username)
+    public async Task<ActionResult<ApiResponse<UserPublicInfo>>> GetUserByUsername(string username)
     {
         var user = await userManager.FindByNameAsync(username);
-        if (user == null) return NotFound();
+        if (user == null) return Error<UserPublicInfo>(404, "User not found");
         var userDto = mapper.Map<UserPublicInfo>(user);
-        return Ok(userDto);
+        return Success(200, "User found", userDto);
     }
 
 
-    // Get user by email - GET api/users/email/{email}
+    // GET USER BY EMAIL - GET api/users/email/{email}
     [HttpGet("email/{email}")]
-    public async Task<ActionResult<UserPublicInfo>> GetUserByEmail(string email)
+    public async Task<ActionResult<ApiResponse<UserPublicInfo>>> GetUserByEmail(string email)
     {
         var user = await userManager.FindByEmailAsync(email);
-        if (user == null) return NotFound();
+        if (user == null) return Error<UserPublicInfo>(404, "User not found");
         var userDto = mapper.Map<UserPublicInfo>(user);
-        return Ok(userDto);
+        return Success(200, "User found", userDto);
     }
 
 
-    // Create User - POST api/users
+    // CREATE USER - POST api/users
     [AllowAnonymous]
     [HttpPost]
-    public async Task<ActionResult<UserPublicInfo>> CreateUser(UserRegistration userCreateDto)
+    public async Task<ActionResult<ApiResponse<UserLoginResponse>>> CreateUser(UserRegistration userCreateDto)
     {
-        // validate the incoming DTO
+        // check if username or email already exists
+        var existingUser = await userManager.FindByNameAsync(userCreateDto.UserName);
+        if (existingUser != null) return Error<UserLoginResponse>(400, "Username already exists");
+        existingUser = await userManager.FindByEmailAsync(userCreateDto.Email);
+        if (existingUser != null) return Error<UserLoginResponse>(400, "Email already exists");
+
+        // save user
         var user = mapper.Map<User>(userCreateDto);
         user.UserName = userCreateDto.UserName;
         user.Email = userCreateDto.Email;
         var result = await userManager.CreateAsync(user, userCreateDto.Password);
-        if (!result.Succeeded) return BadRequest(result.Errors);
+        if (!result.Succeeded) return Error<UserLoginResponse>(400, string.Join("; ", result.Errors.Select(e => e.Description)));
 
         // assign default role and create token
         await userManager.AddToRoleAsync(user, "User");
         var token = await tokenService.CreateTokenAsync(user);
-        
-        // respond with the created user and token
+
+        // respond
         var userLoginResponse = new UserLoginResponse
         {
             Token = token,
@@ -80,21 +82,19 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt
         };
-        return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, userLoginResponse);
+        return Success(201, "User created", userLoginResponse);
     }
 
-    // Login User - POST api/users/login
+
+    // LOGIN USER - POST api/users/login
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult<UserLoginResponse>> LoginUser(UserLoginRequest userLoginDto)
+    public async Task<ActionResult<ApiResponse<UserLoginResponse>>> LoginUser(UserLoginRequest userLoginDto)
     {
-        // validate the incoming DTO
         var user = await userManager.FindByEmailAsync(userLoginDto.Email);
-        if (user == null) return Unauthorized("Invalid username or password");
+        if (user == null) return Error<UserLoginResponse>(401, "Invalid username or password");
         var passwordCheck = await userManager.CheckPasswordAsync(user, userLoginDto.Password);
-        if (!passwordCheck) return Unauthorized("Invalid username or password");
-
-        // create token and respond with user login response
+        if (!passwordCheck) return Error<UserLoginResponse>(401, "Invalid username or password");
         var token = await tokenService.CreateTokenAsync(user);
         var userLoginResponse = new UserLoginResponse
         {
@@ -107,7 +107,7 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt
         };
-        return Ok(userLoginResponse);
+        return Success(200, "Login successful", userLoginResponse);
     }
 
 }
