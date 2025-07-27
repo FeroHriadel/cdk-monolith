@@ -29,7 +29,7 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<
 >(options)
 {
   public required DbSet<Tag> Tags { get; set; }
-
+  public required DbSet<Category> Categories { get; set; }
   // public required DbSet<User> Users { get; set; }   //not needed, inherited from IdentityDbContext
 
   protected override void OnModelCreating(ModelBuilder builder)
