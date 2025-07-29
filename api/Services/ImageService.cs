@@ -23,6 +23,24 @@ public class ImageService : IImageService
   }
 
 
+  // UPLOAD MULTIPLE IMAGES and return list of urls
+  public async Task<List<string>> UploadImagesAsync(List<IFormFile> files)
+  {
+    var imageUrls = new List<string>();
+    if (files == null || files.Count == 0) return imageUrls;
+    foreach (var file in files)
+    {
+      if (file == null || file.Length == 0) continue;
+      if (!IsValidImageType(file)) throw new InvalidOperationException("Invalid file type. Allowed types are: image/jpeg, image/jpg, image/png, image/gif, image/webp");
+      var resizedImage = await ResizeImageAsync(file);
+      var uniqueFileName = GenerateUniqueFileName(file);
+      var imageUrl = await SaveImageAsync(resizedImage, uniqueFileName);
+      imageUrls.Add(imageUrl);
+    }
+    return imageUrls;
+  }
+
+
   // DELETE IMAGE by ImageUrl
   public async Task<string> DeleteImageAsync(string imageUrl)
   {

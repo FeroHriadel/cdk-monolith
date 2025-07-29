@@ -3,6 +3,7 @@
 
 
 
+using Api.Controllers;
 using Api.Dtos;
 using Api.Entities;
 using AutoMapper;
@@ -26,5 +27,15 @@ public class AutoMapperProfiles : Profile
 
     // UserRegistration DTO to User entity
     CreateMap<UserRegistration, User>();
+
+    // Item entity to ItemResponse DTO
+    CreateMap<Item, ItemResponse>()
+      .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+      .ForMember(dest => dest.TagNames, opt => opt.MapFrom(src => src.Tags.Select(t => t.Name).ToList()))
+      .ForMember(dest => dest.TagIds, opt => opt.MapFrom(src => src.Tags.Select(t => t.Id).ToList()))
+      .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src =>
+        src.Images != null
+        ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(src.Images, default(System.Text.Json.JsonSerializerOptions)) ?? new List<string>()
+        : new List<string>()));
   }
 }

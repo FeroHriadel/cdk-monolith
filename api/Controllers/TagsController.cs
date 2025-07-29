@@ -4,7 +4,11 @@ using Api.Interfaces;
 using Api.Dtos;
 using Api.Entities;
 
+
+
 namespace Api.Controllers;
+
+
 
 [Authorize]
 public class TagsController(ITagRepository tagRepository, ITokenService tokenService, ITagCacheService tagCache) : BaseApiController
@@ -124,9 +128,9 @@ public class TagsController(ITagRepository tagRepository, ITokenService tokenSer
     {
       await tagCache.UpdateTagsAsync(new List<Tag>());
     }
-    
+
     // respond
     return Success(200, "Tag deleted", deletedTagId);
   }
-    
+
 }
