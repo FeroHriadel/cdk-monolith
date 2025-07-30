@@ -2,7 +2,6 @@ using Api.Interfaces;
 using Api.Entities;
 using Api.Dtos;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 
 
@@ -80,7 +79,7 @@ public class ItemRepository(DataContext context, IImageService imageService) : I
     // apply filters
     if (categoryId.HasValue) query = query.Where(i => i.CategoryId == categoryId.Value);
     if (tagId.HasValue) query = query.Where(i => i.Tags.Any(t => t.Id == tagId.Value));
-    if (!string.IsNullOrEmpty(searchTerm)) query = query.Where(i => i.Name.Contains(searchTerm) || i.Description.Contains(searchTerm));
+    if (!string.IsNullOrEmpty(searchTerm)) query = query.Where(i => i.Name.Contains(searchTerm) || (i.Description != null && i.Description.Contains(searchTerm)));
 
     // apply pagination
     return await query.Skip(skip).Take(pageSize).ToListAsync();
