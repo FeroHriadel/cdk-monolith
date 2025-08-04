@@ -3,6 +3,7 @@ using Api.Interfaces;
 using Api.Middleware;
 using Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Api.Configuration;
 
 
 
@@ -28,6 +29,10 @@ public static class AppServiceExtensions
     services.AddScoped<ITagCacheService, TagCacheService>();
     services.AddScoped<ICategoryCacheService, CategoryCacheService>();
 
+    //queue
+    services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMQ"));
+    services.AddHostedService<QueueConsumer>();
+
     //services
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<ITokenService, TokenService>();
@@ -35,6 +40,7 @@ public static class AppServiceExtensions
     services.AddScoped<IImageService, ImageService>();
     services.AddScoped<ICategoryRepository, CategoryRepository>();
     services.AddScoped<IItemRepository, ItemRepository>();
+    services.AddScoped<IQueueService, Queue>();
 
     //filters
     services.AddScoped<OnActionExecutionMiddleware>();

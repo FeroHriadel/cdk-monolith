@@ -12,3 +12,5 @@ Template includes:
 - EF roles (Admin, User)
 - AutoMapper
 - Middleware (Exception, OnActionExecution Filter, Authentication with JWT + Role-base authorization)
+- In Memory Cache (IMemoryCache)
+- MessageBroker (RabbitMQ)
