@@ -1,0 +1,17 @@
+<nav class="main-nav">
+
+  <!-- Links for normal screen -->
+  <ul class="normal-screen">
+    <li><a class="pointer text-decoration-none text-dark" routerLink="/">Home</a></li>
+    <li><a class="pointer text-decoration-none text-dark" routerLink="/tags">Tags</a></li>
+    <li><a class="pointer text-decoration-none text-dark" routerLink="/categories">Categories</a></li>
+    <li><a class="pointer text-decoration-none text-dark" routerLink="/items">Items</a></li>
+  </ul>
+
+  <!-- Links for small screen -->
+  <app-dropdown [props]="dropdownProps" class="small-screen "></app-dropdown>
+
+
+
+  <button type="button" class="btn">Login</button>  
+</nav>
