@@ -1,0 +1,18 @@
+<form [formGroup]="formGroup" class="w-100" (ngSubmit)="onSubmit.emit()">
+  @for (field of fields; track field.name) {
+
+    <div class="mb-3 w-100">
+      <label [for]="field.name" class="form-label">{{ field.label }}</label>
+      <input
+        [type]="field.type"
+        [id]="field.name"
+        class="form-control w-100"
+        [placeholder]="field.placeholder"
+        [formControlName]="field.name"
+        [class.is-invalid]="formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched"
+      />
+    </div>
+
+  }
+  <button type="submit" class="btn btn-primary w-100 mt-4">Submit</button>
+</form>
