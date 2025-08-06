@@ -33,6 +33,10 @@ export class MainNavComponent {
     if (typeof itemValue !== 'string') throw new Error('Item value must be a string representing a route');
     this.router.navigateByUrl(itemValue);
   }
+
+  navigateToLogin() {
+    this.router.navigateByUrl('/signin');
+  }
 }
 
 
