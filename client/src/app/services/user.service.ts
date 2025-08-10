@@ -17,9 +17,10 @@ export class UserService {
   apiUrl = environment.apiUrl;
   user = signal<User | null>(null);
 
+  
   // Login and store user in local storage
   login(loginRequest: UserLoginRequest) {
-    return this.http.post<User>(`${this.apiUrl}/Users`, loginRequest).pipe(
+    return this.http.post<User>(`${this.apiUrl}/Users/login`, loginRequest).pipe(
       map(user => {
         if (!user) return;
         localStorage.setItem('user', JSON.stringify(user));

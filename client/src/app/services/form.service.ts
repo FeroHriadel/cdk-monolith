@@ -1,5 +1,5 @@
-
-import { Injectable } from "@angular/core";
+import { ToastrService, ToastrModule } from 'ngx-toastr';
+import { Injectable, inject } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 
 
@@ -11,6 +11,9 @@ import { FormGroup } from "@angular/forms";
 
 
 export class FormService {
+  private toastr = inject(ToastrService);
+
+
   // get form errors
   getFormErrors(form: FormGroup): string[] {
     const errors: string[] = [];
@@ -26,7 +29,7 @@ export class FormService {
   // show form errors
   showFormErrors(form: FormGroup): void {
     const errors = this.getFormErrors(form);
-    if (errors.length > 0) { console.error(errors); }
+    if (errors.length > 0) { this.toastr.error(errors.join(', '), 'Form Errors'); }
   }
 
   //clear form inputs
