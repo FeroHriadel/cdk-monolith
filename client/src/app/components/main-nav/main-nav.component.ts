@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { DropdownProps } from '../../models/dropdown';
+import { DropdownProps } from '../../models/dropdown.model';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { Router, RouterLink } from '@angular/router';
 

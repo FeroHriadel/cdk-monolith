@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable, signal } from "@angular/core";
-import { User, UserLoginRequest } from "../models/user";
+import { User, UserLoginRequest, UserSignupRequest } from "../models/user.model";
 import { map } from "rxjs/operators";
 import { environment } from "../environments/environment";
 
@@ -30,7 +30,16 @@ export class UserService {
     )
   }
 
-
-
+  // Sign up a new user
+  signup(signupRequest: UserSignupRequest) {
+    return this.http.post<User>(`${this.apiUrl}/Users`, signupRequest).pipe(
+      map(user => {
+        if (!user) return;
+        localStorage.setItem('user', JSON.stringify(user));
+        this.user.set(user);
+        return user;
+      })
+    )
+  }
 
 }

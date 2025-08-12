@@ -1,1 +1,13 @@
-<p>signup works!</p>
+<div class="d-flex flex-column justify-content-center align-items-center w-100">
+  <h1 class="mb-4">Sign Up</h1>
+  <app-form 
+    [formGroup]="form" 
+    [fields]="fields" 
+    (onSubmit)="onSubmit()"
+  >
+  </app-form>
+
+  <div class="mt-4">
+    <p> Already have an account? <a routerLink="/signin" class="text-decoration-none text-dark pointer">Sign in</a> </p>
+  </div>
+</div>

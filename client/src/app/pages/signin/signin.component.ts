@@ -5,12 +5,13 @@ import { FormService } from '../../services/form.service';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
 import { timer } from 'rxjs';
+import { RouterLink } from '@angular/router';
 
 
 
 @Component({
   selector: 'app-signin',
-  imports: [ReactiveFormsModule, FormComponent, ToastrModule],
+  imports: [ReactiveFormsModule, FormComponent, ToastrModule, RouterLink],
   templateUrl: './signin.component.html',
   styleUrl: './signin.component.css'
 })
@@ -44,7 +45,7 @@ export class SigninPageComponent implements  OnInit {
   
 
   // initialize signin form
-  public initForm() {
+  private initForm() {
     this.form = new FormGroup({
       Email: new FormControl('user01@email.com', [Validators.required, Validators.email]),
       Password: new FormControl('123456', [Validators.required, Validators.minLength(2)]),
@@ -52,7 +53,7 @@ export class SigninPageComponent implements  OnInit {
   }
 
   // check if form can be submitted
-  public canSubmit(): boolean {
+  private canSubmit(): boolean {
     if (this.form.disabled) return false;
     if (!this.formService.isFormValid(this.form)) {
       this.formService.showFormErrors(this.form);

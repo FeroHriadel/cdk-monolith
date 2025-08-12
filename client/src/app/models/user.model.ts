@@ -15,3 +15,9 @@ export interface UserLoginRequest {
   Email: string;
   Password: string;
 }
+
+export interface UserSignupRequest {
+  Email: string;
+  Password: string;
+  UserName: string;
+}

@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { FormField } from '../../models/form';
+import { FormField } from '../../models/form.model';
 
 
 

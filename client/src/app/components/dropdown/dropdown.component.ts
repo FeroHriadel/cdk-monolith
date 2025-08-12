@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
-import { DropdownProps } from '../../models/dropdown';
+import { DropdownProps } from '../../models/dropdown.model';
 
 
 @Component({
