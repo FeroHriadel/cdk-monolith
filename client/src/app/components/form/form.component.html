@@ -2,7 +2,7 @@
   @for (field of fields; track field.name) {
 
     <div class="mb-3 w-100">
-      <label [for]="field.name" class="form-label">{{ field.label }}</label>
+      <label [for]="field.name" class="form-label" [class.form-disabled]="formGroup.disabled">{{ field.label }}</label>
       <input
         [type]="field.type"
         [id]="field.name"
@@ -14,5 +14,5 @@
     </div>
 
   }
-  <button type="submit" class="btn btn-primary w-100 mt-4">Submit</button>
+  <button type="submit" class="btn btn-primary w-100 mt-4" [class.form-disabled]="formGroup.disabled">Submit</button>
 </form>

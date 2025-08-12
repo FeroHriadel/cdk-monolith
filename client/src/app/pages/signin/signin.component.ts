@@ -1,9 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormService } from '../../services/form.service';
 import { FormComponent } from "../../components/form/form.component";
+import { FormService } from '../../services/form.service';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
+import { timer } from 'rxjs';
 
 
 
@@ -17,7 +18,6 @@ import { UserService } from '../../services/user.service';
 
 
 export class SigninPageComponent implements  OnInit {
-  private loading = false;
   private userService = inject(UserService);
   private formService = inject(FormService);
   private toastr = inject(ToastrService);
@@ -27,13 +27,13 @@ export class SigninPageComponent implements  OnInit {
       label: 'Email', 
       type: 'email' as 'email', 
       placeholder: 'Enter your email', 
-      validators: [Validators.required, Validators.email] 
+      validators: [Validators.required, Validators.email],
     },
     { name: 'Password', 
       label: 'Password', 
       type: 'password' as 'password', 
       placeholder: 'Enter your password', 
-      validators: [Validators.required, Validators.minLength(2)] 
+      validators: [Validators.required, Validators.minLength(2)]
     },
   ];
 
@@ -51,14 +51,36 @@ export class SigninPageComponent implements  OnInit {
     });
   }
 
+  // check if form can be submitted
+  public canSubmit(): boolean {
+    if (this.form.disabled) return false;
+    if (!this.formService.isFormValid(this.form)) {
+      this.formService.showFormErrors(this.form);
+      return false;
+    }
+    return true;
+  }
+
+  // toggle loading state
+  private toggleLoading() {
+    this.form.disabled ? this.form.enable() : this.form.disable();
+  }
+
   // on form submit
   public onSubmit() {
-    if (this.loading) return;
-    if (!this.formService.isFormValid(this.form)) return this.formService.showFormErrors(this.form);
-    this.loading = true;
+    if (!this.canSubmit()) return;
+    this.toggleLoading();
     this.userService.login(this.form.value).subscribe({
-      next: (user) => this.toastr.success('Login successful', 'Success'),
-      error: (error) => { this.toastr.error(error.message, 'Error'); this.loading = false; },
+      next: (user) => { 
+        this.toastr.success('Login successful', 'Success');
+        timer(2000).subscribe(() => {
+          this.toggleLoading();
+        });
+      },
+      error: (error) => {
+        this.toastr.error(error.error.message, 'Error');
+        this.toggleLoading();
+      },
     });
   }
 }
