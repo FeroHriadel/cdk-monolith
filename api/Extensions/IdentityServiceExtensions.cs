@@ -30,9 +30,10 @@ public static class IdentityServiceExtensions
 
 
     // Configure Identity options
-    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) //use Bearer JWT for auth
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+      //use Bearer JWT for auth
       var tokenKey = config["TokenKey"] ?? throw new Exception("TokenKey is not configured.");
       options.TokenValidationParameters = new TokenValidationParameters
       {
@@ -41,6 +42,23 @@ public static class IdentityServiceExtensions
         ValidateIssuer = false,
         ValidateAudience = false
       };
+
+      // take token from cookie (if you comment this out token will be read from Authorization header)
+      options.Events = new JwtBearerEvents
+      {
+        OnMessageReceived = context =>
+        {
+          // read token from cookie
+          var token = context.HttpContext.Request.Cookies["Authorization"];
+          Console.WriteLine($"[JWT Cookie] Authorization={token}");
+          if (!string.IsNullOrEmpty(token))
+          {
+            context.Token = token;
+          }
+          return Task.CompletedTask;
+        }
+      };
+
     });
 
 

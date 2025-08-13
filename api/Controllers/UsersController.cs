@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Api.Controllers;
 
 [Authorize]
-public class UsersController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper) : BaseApiController
+public class UsersController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IConfiguration config) : BaseApiController
 {
 
     // GET USER BY ID- GET api/users/{id}
@@ -66,14 +66,12 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
         var result = await userManager.CreateAsync(user, userCreateDto.Password);
         if (!result.Succeeded) return Error<UserLoginResponse>(400, string.Join("; ", result.Errors.Select(e => e.Description)));
 
-        // assign default role and create token
+        // assign default role
         await userManager.AddToRoleAsync(user, "User");
-        var token = await tokenService.CreateTokenAsync(user);
 
-        // respond
+        // respond with user info & set Authorization http cookie
         var userLoginResponse = new UserLoginResponse
         {
-            Token = token,
             UserName = user.UserName,
             Email = user.Email,
             Id = user.Id,
@@ -82,6 +80,14 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt
         };
+        var token = await tokenService.CreateTokenAsync(user);
+        HttpContext.Response.Cookies.Append("Authorization", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = config.GetValue<bool>("JwtCookie:Secure"),
+            //SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(7)
+        });
         return Success(201, "User created", userLoginResponse);
     }
 
@@ -95,10 +101,9 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
         if (user == null) return Error<UserLoginResponse>(401, "Invalid username or password");
         var passwordCheck = await userManager.CheckPasswordAsync(user, userLoginDto.Password);
         if (!passwordCheck) return Error<UserLoginResponse>(401, "Invalid username or password");
-        var token = await tokenService.CreateTokenAsync(user);
+        
         var userLoginResponse = new UserLoginResponse
         {
-            Token = token,
             UserName = user.UserName!,
             Email = user.Email!,
             Id = user.Id,
@@ -107,6 +112,14 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt
         };
+        var token = await tokenService.CreateTokenAsync(user);
+        HttpContext.Response.Cookies.Append("Authorization", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = config.GetValue<bool>("JwtCookie:Secure"),
+            //SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(7)
+        });
         return Success(200, "Login successful", userLoginResponse);
     }
 
