@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Api.Controllers;
 
 [Authorize]
-public class UsersController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IConfiguration config) : BaseApiController
+public class UsersController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper) : BaseApiController
 {
 
     // GET USER BY ID- GET api/users/{id}
@@ -81,13 +81,7 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
             UpdatedAt = user.UpdatedAt
         };
         var token = await tokenService.CreateTokenAsync(user);
-        HttpContext.Response.Cookies.Append("Authorization", token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = config.GetValue<bool>("JwtCookie:Secure"),
-            //SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(7)
-        });
+        tokenService.SetTokenAsCookieAsync(token, HttpContext);
         return Success(201, "User created", userLoginResponse);
     }
 
@@ -101,7 +95,7 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
         if (user == null) return Error<UserLoginResponse>(401, "Invalid username or password");
         var passwordCheck = await userManager.CheckPasswordAsync(user, userLoginDto.Password);
         if (!passwordCheck) return Error<UserLoginResponse>(401, "Invalid username or password");
-        
+
         var userLoginResponse = new UserLoginResponse
         {
             UserName = user.UserName!,
@@ -113,14 +107,35 @@ public class UsersController(UserManager<User> userManager, ITokenService tokenS
             UpdatedAt = user.UpdatedAt
         };
         var token = await tokenService.CreateTokenAsync(user);
-        HttpContext.Response.Cookies.Append("Authorization", token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = config.GetValue<bool>("JwtCookie:Secure"),
-            //SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(7)
-        });
+        tokenService.SetTokenAsCookieAsync(token, HttpContext);
         return Success(200, "Login successful", userLoginResponse);
+    }
+
+
+    //REFRESH TOKEN
+    [HttpGet("refreshtoken")]
+    public async Task<ActionResult<ApiResponse<UserLoginResponse>>> RefreshToken()
+    {
+        var token = HttpContext.Request.Cookies["Authorization"];
+        if (string.IsNullOrEmpty(token))
+            return Error<UserLoginResponse>(401, "No token found");
+
+        var user = await tokenService.GetUserFromTokenAsync(token);
+        if (user == null) return Error<UserLoginResponse>(401, "Invalid token");
+
+        var userLoginResponse = new UserLoginResponse
+        {
+            UserName = user.UserName!,
+            Email = user.Email!,
+            Id = user.Id,
+            Roles = (await userManager.GetRolesAsync(user)).ToList(),
+            LastActive = user.LastActive,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
+        var newToken = await tokenService.CreateTokenAsync(user);
+        tokenService.SetTokenAsCookieAsync(newToken, HttpContext);
+        return Success(200, "Token refreshed", userLoginResponse);
     }
 
 }

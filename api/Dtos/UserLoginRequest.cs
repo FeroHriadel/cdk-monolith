@@ -11,7 +11,4 @@ public class UserLoginRequest
 
     [Required]
     public required string Password { get; set; }
-
-    [Required]
-    public required string UserName { get; set; }
 }

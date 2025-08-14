@@ -1,6 +1,5 @@
 export interface User {
-  data: {
-    token: string;
+    // token: string; //comes in 'Authorization' cookie
     userName: string;
     email: string;
     id: number;
@@ -8,7 +7,20 @@ export interface User {
     lastActive: string;
     createdAt: string;
     updatedAt: string;
-  }
+}
+
+export interface UserLoginResponse {
+  data: {
+    userName: string;
+    email: string;
+    id: number;
+    roles: string[];
+    lastActive: string;
+    createdAt: string;
+    updatedAt: string;
+  },
+  statusCode: number;
+  message: string;
 }
 
 export interface UserLoginRequest {

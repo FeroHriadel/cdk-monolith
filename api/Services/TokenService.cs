@@ -5,7 +5,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Api.Entities;
 using Api.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -53,10 +52,55 @@ public class TokenService(IConfiguration config, UserManager<User> userManager) 
   }
 
 
+  // GET USER FROM TOKEN
+  public async Task<User?> GetUserFromTokenAsync(string token)
+  {
+    // check if token is null or empty
+    if (string.IsNullOrEmpty(token)) return null;
+
+    // create token handler
+    var tokenHandler = new JwtSecurityTokenHandler();
+    try
+    {
+      // validate token
+      var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+      {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]!)),
+        ValidateIssuer = false,
+        ValidateAudience = false
+      }, out _);
+
+      // get email from claims
+      var email = GetEmailFromClaims(principal);
+      return await userManager.FindByEmailAsync(email);
+    }
+    catch (Exception)
+    {
+      return null;
+    }
+  }
+
+
   // GET EMAIL FROM CLAIMS
   public string GetEmailFromClaims(ClaimsPrincipal user)
   {
     // get email from claims
     return user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == "email")?.Value ?? throw new Exception("User email not found in claims.");
   }
+
+
+
+  // SET TOKEN AS COOKIE
+  public void SetTokenAsCookieAsync(string token, HttpContext httpContext)
+  {
+    httpContext.Response.Cookies.Append("Authorization", token, new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = config.GetValue<bool>("JwtCookie:Secure"),
+        SameSite = SameSiteMode.Lax,
+        Expires = DateTime.UtcNow.AddDays(7)
+    });
+  }
+    
 }

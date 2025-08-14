@@ -11,7 +11,14 @@ builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseCors(policy =>
+  policy
+  // .AllowAnyOrigin()
+  .WithOrigins("http://localhost:4200")
+  .AllowAnyMethod()
+  .AllowAnyHeader()
+  .AllowCredentials()
+);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
