@@ -12,16 +12,15 @@ import { LocalStorageService } from "./localStorage.service";
 })
 
 
-
+/* This app doesn't send Auth token in headers but relies on http-only cookies sent by api/from browser for auth */
 export class UserService {
   private localStorageService = inject(LocalStorageService);
   private http = inject(HttpClient);
   public user = signal<User | null>(null);
   public apiUrl = environment.apiUrl;
-
-  // This app doesn't send Auth token in headers but relies on http-only cookies sent by api/from browser for auth
   
-  // Login and store user in local storage
+
+  // Login and store user in local storage (auth cooie will be set by api response)
   public login(loginRequest: UserLoginRequest) {
     // note the {withCredentials: true} - response cookie won't be set without it
     return this.http.post<UserLoginResponse>(`${this.apiUrl}/Users/login`, loginRequest, {withCredentials: true}).pipe(
@@ -34,7 +33,7 @@ export class UserService {
     )
   }
 
-  // Sign up a new user
+  // Sign up and store user in local storage (auth cooie will be set by api response)
   public signup(signupRequest: UserSignupRequest) {
     return this.http.post<UserLoginResponse>(`${this.apiUrl}/Users`, signupRequest, {withCredentials: true}).pipe(
       map(signupResponse => {
@@ -46,6 +45,7 @@ export class UserService {
     )
   }
 
+  // Refresh token - send a request with cookie? to api - if valid it will refresh the cookie & send user data
   public refreshToken() {
     return this.http.get<UserLoginResponse>(`${this.apiUrl}/Users/refreshtoken`, {withCredentials: true}).pipe(
       map(refreshResponse => {
@@ -55,6 +55,12 @@ export class UserService {
         return refreshResponse.data;
       })
     )
+  }
+
+  // Logout user and remove from local storage
+  public logout() {
+    this.localStorageService.removeUser();
+    this.user.set(null);
   }
 
 }

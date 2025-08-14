@@ -11,5 +11,10 @@
   <!-- Links for small screen -->
   <app-dropdown [props]="dropdownProps" class="small-screen "></app-dropdown>
 
-  <button type="button" class="btn" (click)="navigateToLogin()">Login</button>  
+  @if (isLoggedIn) {
+    <button type="button" class="btn" (click)="logout()">Logout</button>
+  } 
+  @else {
+    <button type="button" class="btn" (click)="navigateToLogin()">Login</button>
+  }
 </nav>

@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormService } from '../../services/form.service';
 import { FormComponent } from '../../components/form/form.component';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { timer } from 'rxjs';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 
 
@@ -19,9 +19,11 @@ import { RouterLink } from '@angular/router';
 
 
 export class SignupPageComponent {
+  // Properties
   private userService = inject(UserService);
   private formService = inject(FormService);
   private toastr = inject(ToastrService);
+  private router = inject(Router);
   public form: FormGroup = new FormGroup({});
   public fields = [
     { name: 'Email', 
@@ -45,8 +47,24 @@ export class SignupPageComponent {
     }
   ];
 
+  
+  // Effects:
+  private redirectEffect = effect(() => this.redirectIfLoggedIn());
+
+
+  // Lifecycle
   constructor() {
     this.initForm();
+  }
+
+
+  // Methods
+
+  // redirect signed-in user (used in `private redirectEffect` property)
+  private redirectIfLoggedIn() {
+    if (this.userService.user() !== null) {
+      this.router.navigateByUrl('/');
+    }
   }
 
   // initialize signup form
@@ -73,6 +91,7 @@ export class SignupPageComponent {
     this.form.disabled ? this.form.enable() : this.form.disable();
   }
 
+  // on form submit => signup+in user
   public onSubmit() {
       if (!this.canSubmit()) return;
       this.toggleLoading();

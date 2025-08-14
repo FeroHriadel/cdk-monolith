@@ -1,11 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, effect } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormComponent } from "../../components/form/form.component";
 import { FormService } from '../../services/form.service';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
 import { timer } from 'rxjs';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 
 
@@ -19,9 +19,11 @@ import { RouterLink } from '@angular/router';
 
 
 export class SigninPageComponent implements  OnInit {
+  // Properties
   private userService = inject(UserService);
   private formService = inject(FormService);
   private toastr = inject(ToastrService);
+  private router = inject(Router);
   public form: FormGroup = new FormGroup({});
   public fields = [
     { name: 'Email', 
@@ -37,12 +39,26 @@ export class SigninPageComponent implements  OnInit {
       validators: [Validators.required, Validators.minLength(2)]
     },
   ];
+  
+  
+  // Effects:
+  private redirectEffect = effect(() => this.redirectIfLoggedIn());
 
 
+  // Lifecycle
   ngOnInit(): void {
     this.initForm();
   }
+
   
+  // Methods
+
+  // redirect signed-in user (used in `private redirectEffect` property)
+  private redirectIfLoggedIn() {
+    if (this.userService.user() !== null) {
+      this.router.navigateByUrl('/');
+    }
+  }
 
   // initialize signin form
   private initForm() {
@@ -67,7 +83,7 @@ export class SigninPageComponent implements  OnInit {
     this.form.disabled ? this.form.enable() : this.form.disable();
   }
 
-  // on form submit
+  // on form submit => login user
   public onSubmit() {
     if (!this.canSubmit()) return;
     this.toggleLoading();

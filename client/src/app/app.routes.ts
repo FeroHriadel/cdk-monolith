@@ -8,7 +8,6 @@ import { SigninPageComponent } from './pages/signin/signin.component';
 
 
 
-
 export const routes: Routes = [
   { path: '', component: HomePageComponent },
   { path: 'tags', component: TagsPageComponent },

@@ -21,7 +21,7 @@ export class LocalStorageService {
     localStorage.setItem('user', JSON.stringify(user));
   }
 
-  public deleteUser() {
+  public removeUser() {
     localStorage.removeItem('user');
   }
 
