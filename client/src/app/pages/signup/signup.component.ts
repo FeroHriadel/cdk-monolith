@@ -3,7 +3,6 @@ import { UserService } from '../../services/user.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormService } from '../../services/form.service';
 import { FormComponent } from '../../components/form/form.component';
-import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { timer } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
 
@@ -11,7 +10,7 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
-  imports: [ReactiveFormsModule, FormComponent, ToastrModule, RouterLink],
+  imports: [ReactiveFormsModule, FormComponent, RouterLink],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'
 })
@@ -19,10 +18,9 @@ import { Router, RouterLink } from '@angular/router';
 
 
 export class SignupPageComponent {
-  // Properties
+  // Properties:
   private userService = inject(UserService);
   private formService = inject(FormService);
-  private toastr = inject(ToastrService);
   private router = inject(Router);
   public form: FormGroup = new FormGroup({});
   public fields = [
@@ -52,13 +50,13 @@ export class SignupPageComponent {
   private redirectEffect = effect(() => this.redirectIfLoggedIn());
 
 
-  // Lifecycle
+  // Lifecycle:
   constructor() {
     this.initForm();
   }
 
 
-  // Methods
+  // Methods:
 
   // redirect signed-in user (used in `private redirectEffect` property)
   private redirectIfLoggedIn() {
@@ -80,7 +78,7 @@ export class SignupPageComponent {
   private canSubmit(): boolean {
     if (this.form.disabled) return false;
     if (!this.formService.isFormValid(this.form)) {
-      this.formService.showFormErrors(this.form);
+      this.formService.showError(this.form);
       return false;
     }
     return true;
@@ -97,14 +95,16 @@ export class SignupPageComponent {
       this.toggleLoading();
       this.userService.signup(this.form.value).subscribe({
         next: (user) => { 
-          this.toastr.success('Sign up successful', 'Success');
+          this.formService.showSuccess('Sign up successful');
           timer(2000).subscribe(() => {
             this.toggleLoading();
+            this.formService.clearForm(this.form);
           });
         },
         error: (error) => {
-          this.toastr.error(error.error.message, 'Error');
+          this.formService.showError(error.error.message || 'Unknown error');
           this.toggleLoading();
+          this.formService.clearForm(this.form);
         },
       });
     }

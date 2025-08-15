@@ -2,7 +2,6 @@ import { Component, inject, OnInit, effect } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormComponent } from "../../components/form/form.component";
 import { FormService } from '../../services/form.service';
-import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
 import { timer } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
@@ -11,7 +10,7 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-signin',
-  imports: [ReactiveFormsModule, FormComponent, ToastrModule, RouterLink],
+  imports: [ReactiveFormsModule, FormComponent, RouterLink],
   templateUrl: './signin.component.html',
   styleUrl: './signin.component.css'
 })
@@ -19,10 +18,9 @@ import { Router, RouterLink } from '@angular/router';
 
 
 export class SigninPageComponent implements  OnInit {
-  // Properties
+  // Properties:
   private userService = inject(UserService);
   private formService = inject(FormService);
-  private toastr = inject(ToastrService);
   private router = inject(Router);
   public form: FormGroup = new FormGroup({});
   public fields = [
@@ -45,13 +43,13 @@ export class SigninPageComponent implements  OnInit {
   private redirectEffect = effect(() => this.redirectIfLoggedIn());
 
 
-  // Lifecycle
+  // Lifecycle:
   ngOnInit(): void {
     this.initForm();
   }
 
   
-  // Methods
+  // Methods:
 
   // redirect signed-in user (used in `private redirectEffect` property)
   private redirectIfLoggedIn() {
@@ -72,7 +70,7 @@ export class SigninPageComponent implements  OnInit {
   private canSubmit(): boolean {
     if (this.form.disabled) return false;
     if (!this.formService.isFormValid(this.form)) {
-      this.formService.showFormErrors(this.form);
+      this.formService.showError(this.form);
       return false;
     }
     return true;
@@ -89,14 +87,18 @@ export class SigninPageComponent implements  OnInit {
     this.toggleLoading();
     this.userService.login(this.form.value).subscribe({
       next: (user) => { 
-        this.toastr.success('Login successful', 'Success');
+        this.formService.showSuccess('Login successful');
         timer(2000).subscribe(() => {
           this.toggleLoading();
+          this.formService.clearForm(this.form);
         });
       },
       error: (error) => {
-        this.toastr.error(error.error.message, 'Error');
-        this.toggleLoading();
+        this.formService.showError(error.error?.message || 'Unknown error');
+        timer(2000).subscribe(() => {
+          this.toggleLoading();
+          this.formService.clearForm(this.form);
+        });
       },
     });
   }

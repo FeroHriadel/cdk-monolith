@@ -26,10 +26,18 @@ export class FormService {
     return errors;
   }
 
-  // show form errors
-  showFormErrors(form: FormGroup): void {
-    const errors = this.getFormErrors(form);
-    if (errors.length > 0) { this.toastr.error(errors.join(', '), 'Form Errors'); }
+  // show error message - either FormGroup errors or string message
+  showError(error: FormGroup | string): void {
+    if (typeof error === 'string') this.toastr.error(error, 'Error');
+    else {
+      const errors = this.getFormErrors(error);
+      if (errors.length > 0) { this.toastr.error(errors.join(', '), 'Form Errors'); }
+    }
+  }
+
+  // show success message
+  showSuccess(message: string) {
+    this.toastr.success(message, 'Success');
   }
 
   //clear form inputs
