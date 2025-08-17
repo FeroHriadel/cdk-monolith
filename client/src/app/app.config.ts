@@ -4,6 +4,8 @@ import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
+import { provideIcons } from '@ng-icons/core';
+import { bootstrapPencil, bootstrapPlus, bootstrapTrash } from '@ng-icons/bootstrap-icons';
 
 
 
@@ -19,6 +21,7 @@ export const appConfig: ApplicationConfig = {
       preventDuplicates: true,
       closeButton: true,
       progressBar: true
-    })
+    }),
+    provideIcons({ bootstrapPencil, bootstrapPlus, bootstrapTrash })
   ]
 };

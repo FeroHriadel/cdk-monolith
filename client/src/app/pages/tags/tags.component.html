@@ -1,1 +1,9 @@
-<p>tags works!</p>
+<div class="container">
+  <app-list 
+    [items]="(tagsList$ | async) ?? []" 
+    title="TAGS"
+    (onItemEdit)="handleEdit($event)"
+    (onItemAdd)="handleAddTag()"
+    (onItemDelete)="handleDelete($event)"
+  ></app-list>
+</div>

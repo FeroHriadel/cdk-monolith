@@ -1,0 +1,27 @@
+<ul class="list-group list-group-flush">
+  <!-- Title -->
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    <p>{{ title }}</p>
+    @if (onItemAdd.observers.length > 0) { 
+      <button class="btn btn-primary btn-sm" (click)="onItemAdd.emit()">
+        <ng-icon name="bootstrapPlus"></ng-icon>
+      </button> }
+  </li>
+
+  <!-- List items -->
+   @for (item of items; track item.value) {
+     <li class="list-group-item d-flex justify-content-between align-items-center">
+       <p>{{ item.label }}</p>
+       <span class="">
+          @if (onItemEdit.observers.length > 0) { 
+            <button class="btn btn-secondary btn-sm mx-1" (click)="onItemEdit.emit(item)">
+              <ng-icon name="bootstrapPencil"></ng-icon>
+            </button> }
+          @if (onItemDelete.observers.length > 0) { 
+            <button class="btn btn-secondary btn-sm" (click)="onItemDelete.emit(item)">
+              <ng-icon name="bootstrapTrash"></ng-icon>
+            </button> }
+       </span>
+     </li>
+   }
+</ul>
