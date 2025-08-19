@@ -1,0 +1,38 @@
+<div class="backdrop" *ngIf="visible" @fadeBackdrop (click)="close()">
+  <div class="dialog" @fadeDialog (click)="$event.stopPropagation()">
+		<!-- close button -->
+    <button class="close-btn" (click)="close()">✕</button>
+
+		<!-- modal content -->
+    <ng-content *ngTemplateOutlet="modalContent"></ng-content>
+  </div>
+</div>
+
+
+<!--
+use like this in parent:
+
+PARENT.COMPONENT.TS:
+	import { Component, OnInit, inject, ViewChild, TemplateRef } from '@angular/core';
+	@Component({
+		selector: 'app-tags',
+		imports: [ModalComponent],
+		...
+	})
+	export class TagsPageComponent implements OnInit {
+		@ViewChild('modalRef') modal!: ModalComponent;
+		@ViewChild('modalContent') modalContent!: TemplateRef<any>;
+	...
+	this.modal.open(this.modalContent);
+
+
+
+PARENT.COMPONENT.HTML:
+	<app-modal #modalRef>
+		<ng-template #modalContent>
+			<h1 *ngIf="tagAction === TagAction.ADD">Add Tag</h1>
+			<h1 *ngIf="tagAction === TagAction.EDIT">Edit Tag</h1>
+			<h1 *ngIf="tagAction === TagAction.DELETE">Delete Tag</h1>
+		</ng-template>
+	</app-modal>
+-->

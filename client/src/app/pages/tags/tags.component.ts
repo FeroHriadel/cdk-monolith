@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common'; //enables *ngIf
 import { TagService } from '../../services/tag.service';
 import { Observable } from 'rxjs';
@@ -6,12 +6,21 @@ import { map } from 'rxjs/operators';
 import { Tag } from '../../models/tag.model';
 import { ListComponent } from '../../components/list/list.component';
 import { ListItem } from '../../models/list.model';
+import { ModalComponent } from '../../components/modal/modal.component';
+
+
+
+enum TagAction {
+  ADD = 'ADD',
+  EDIT = 'EDIT',
+  DELETE = 'DELETE'
+}
 
 
 
 @Component({
   selector: 'app-tags',
-  imports: [CommonModule, ListComponent],
+  imports: [CommonModule, ListComponent, ModalComponent],
   templateUrl: './tags.component.html',
   styleUrl: './tags.component.css'
 })
@@ -19,9 +28,13 @@ import { ListItem } from '../../models/list.model';
 
 
 export class TagsPageComponent implements OnInit {
+  @ViewChild('modalRef') modal!: ModalComponent;
+  @ViewChild('modalContent') modalContent!: TemplateRef<any>;
   private tagService: TagService = inject(TagService);
   public tags$!: Observable<Tag[]>;
   public tagsList$!: Observable<ListItem[]>;
+  public TagAction = TagAction;
+  public tagAction: TagAction | null = null;
 
 
   ngOnInit() {
@@ -40,18 +53,28 @@ export class TagsPageComponent implements OnInit {
     }));
   }
 
-  // handles edit event from the list component
+  // handles open modal
+  public handleOpenModal(action: TagAction) {
+    this.tagAction = action;
+    console.log(this.tagAction)
+    this.modal.open(this.modalContent); // Pass the template to the modal
+  }
+
+  // handles add tag from the list component
+  public handleAddTag() {
+    console.log('Add new tag');
+  }
+
+  // handles edit tag from the list component
   public handleEdit(item: ListItem) {
+    this.modal.close();
     console.log('Edited item:', item);
   }
 
-  // handles delete event from the list component
+  // handles delete tag from the list component
   public handleDelete(item: ListItem) {
     console.log('Deleted item:', item);
   }
 
-  public handleAddTag() {
-    console.log('Add new tag');
-  }
 
 }
