@@ -35,6 +35,7 @@ export class TagsPageComponent implements OnInit {
   public tagsList$!: Observable<ListItem[]>;
   public TagAction = TagAction;
   public tagAction: TagAction | null = null;
+  public editedTag: Tag | null = null;
 
 
   ngOnInit() {
@@ -45,7 +46,7 @@ export class TagsPageComponent implements OnInit {
   }
 
 
-  // maps tags to list items that can be passed to the list component
+  // maps tags to list items that can be passed to <app-list>
   private mapTagsToListItems(tags: Tag[]): ListItem[] {
     return tags.map(tag => ({
       label: tag.name,
@@ -53,28 +54,41 @@ export class TagsPageComponent implements OnInit {
     }));
   }
 
-  // handles open modal
-  public handleOpenModal(action: TagAction) {
+  // open modal and save clicked tag + tagAction(edit/delete/add)
+  public handleOpenModal(action: TagAction, tag: Tag | null) {
     this.tagAction = action;
-    console.log(this.tagAction)
-    this.modal.open(this.modalContent); // Pass the template to the modal
+    this.editedTag = tag;
+    this.modal.open(this.modalContent);
   }
 
-  // handles add tag from the list component
-  public handleAddTag() {
-    console.log('Add new tag');
+  // when user clicks add icon in <app-list>
+  public onItemAdd() {
+    this.handleOpenModal(TagAction.ADD, null);
   }
 
-  // handles edit tag from the list component
-  public handleEdit(item: ListItem) {
-    this.modal.close();
-    console.log('Edited item:', item);
+  // when user clicks edit icon in <app-list>
+  public onItemEdit(item: ListItem) {
+    this.handleOpenModal(TagAction.EDIT, item.value);
   }
 
-  // handles delete tag from the list component
-  public handleDelete(item: ListItem) {
-    console.log('Deleted item:', item);
+  // when user clicks delete icon in <app-list>
+  public onItemDelete(item: ListItem) {
+    this.handleOpenModal(TagAction.DELETE, item.value);
   }
 
+  // when user confirmed the modal
+  public onModalConfirm() {
+    switch (this.tagAction) {
+      case TagAction.ADD:
+        console.log('Add tag action confirmed');
+        break;
+      case TagAction.EDIT:
+        console.log('Edit tag action confirmed');
+        break;
+      case TagAction.DELETE:
+        console.log('Delete tag action confirmed');
+        break;
+    }
+  }
 
 }

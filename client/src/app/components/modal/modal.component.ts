@@ -1,4 +1,4 @@
-import { Component, TemplateRef } from '@angular/core';
+import { Component, TemplateRef, Output, EventEmitter } from '@angular/core';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 
@@ -35,18 +35,29 @@ import { NgIf, NgTemplateOutlet } from '@angular/common';
 
 
 export class ModalComponent {
+  @Output() opened = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
+  @Output() confirmed = new EventEmitter<void>();
   visible = false;
   modalContent!: TemplateRef<any>;
-
+  
 
   // open modal
-  open(content: TemplateRef<any>) {
+  public open(content: TemplateRef<any>) {   
     this.modalContent = content;
     this.visible = true;
+    this.opened.emit();
   }
 
   // close modal
-  close() {
+  public close() {
     this.visible = false;
+    this.closed.emit();
   }
+
+  public confirm() {
+    this.visible = false;
+    this.confirmed.emit();
+  }
+
 }

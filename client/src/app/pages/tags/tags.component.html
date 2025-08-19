@@ -2,13 +2,13 @@
   <app-list 
     [items]="(tagsList$ | async) ?? []" 
     title="TAGS"
-    (onItemEdit)="handleOpenModal(TagAction.EDIT)"
-    (onItemAdd)="handleOpenModal(TagAction.ADD)"
-    (onItemDelete)="handleOpenModal(TagAction.DELETE)"
+    (onItemEdit)="onItemEdit($event)"
+    (onItemAdd)="onItemAdd()"
+    (onItemDelete)="onItemDelete($event)"
   ></app-list>
 </div>
 
-<app-modal #modalRef>
+<app-modal #modalRef (confirmed)="onModalConfirm()">
   <ng-template #modalContent>
     <h1 *ngIf="tagAction === TagAction.ADD">Add Tag</h1>
     <h1 *ngIf="tagAction === TagAction.EDIT">Edit Tag</h1>

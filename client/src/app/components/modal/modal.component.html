@@ -1,12 +1,23 @@
 <div class="backdrop" *ngIf="visible" @fadeBackdrop (click)="close()">
-  <div class="dialog" @fadeDialog (click)="$event.stopPropagation()">
+
+	<div class="dialog" @fadeDialog (click)="$event.stopPropagation()">
 		<!-- close button -->
     <button class="close-btn" (click)="close()">✕</button>
 
 		<!-- modal content -->
-    <ng-content *ngTemplateOutlet="modalContent"></ng-content>
+    <div class="modal-content">
+			<ng-content *ngTemplateOutlet="modalContent"></ng-content>
+		</div>
+
+		<!-- confirm/close buttons -->
+		<div class="modal-footer d-flex flex-column flex-sm-row w-50">
+			<button class="btn btn-secondary flex-fill w-sm-auto mx-2 my-2" (click)="close()">Close</button>
+			<button class="btn btn-primary flex-fill w-sm-auto mx-2" (click)="confirm()">Confirm</button>
+		</div>
   </div>
+
 </div>
+
 
 
 <!--
