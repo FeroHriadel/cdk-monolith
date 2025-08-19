@@ -1,0 +1,20 @@
+.list-header {
+
+}
+
+.list-header h4 {
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+.list-group {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 0;
+}
+
+.list-group-item {
+  margin-right: 0;
+  width: 100%;
+}

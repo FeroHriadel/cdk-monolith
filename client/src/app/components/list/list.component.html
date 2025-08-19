@@ -1,25 +1,25 @@
-<ul class="list-group list-group-flush">
+<ul class="list-group list-group-flush container">
   <!-- Title -->
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    <p>{{ title }}</p>
+  <li class="list-group-item d-flex justify-content-between align-items-center bg-light list-header">
+    <h4 class="text-muted">{{ title }}</h4>
     @if (onItemAdd.observers.length > 0) { 
       <button class="btn btn-primary btn-sm" (click)="onItemAdd.emit()">
-        <ng-icon name="bootstrapPlus"></ng-icon>
+        <ng-icon name="bootstrapPlus" class="normalize-icon fs-4"></ng-icon>
       </button> }
   </li>
 
   <!-- List items -->
    @for (item of items; track item.value) {
      <li class="list-group-item d-flex justify-content-between align-items-center">
-       <p>{{ item.label }}</p>
+       <span>{{ item.label }}</span>
        <span class="">
           @if (onItemEdit.observers.length > 0) { 
             <button class="btn btn-secondary btn-sm mx-1" (click)="onItemEdit.emit(item)">
-              <ng-icon name="bootstrapPencil"></ng-icon>
+              <ng-icon name="bootstrapPencil" class="normalize-icon"></ng-icon>
             </button> }
           @if (onItemDelete.observers.length > 0) { 
             <button class="btn btn-secondary btn-sm" (click)="onItemDelete.emit(item)">
-              <ng-icon name="bootstrapTrash"></ng-icon>
+              <ng-icon name="bootstrapTrash" class="normalize-icon"></ng-icon>
             </button> }
        </span>
      </li>

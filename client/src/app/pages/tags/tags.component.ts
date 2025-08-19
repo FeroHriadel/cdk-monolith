@@ -76,6 +76,12 @@ export class TagsPageComponent implements OnInit {
     this.handleOpenModal(TagAction.DELETE, item.value);
   }
 
+  // user closed modal - clear tagAction and editedTag
+  public onModalClose() {
+    this.tagAction = null;
+    this.editedTag = null;
+  }
+
   // when user confirmed the modal
   public onModalConfirm() {
     switch (this.tagAction) {

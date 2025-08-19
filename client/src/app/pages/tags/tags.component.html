@@ -8,7 +8,7 @@
   ></app-list>
 </div>
 
-<app-modal #modalRef (confirmed)="onModalConfirm()">
+<app-modal #modalRef (confirmed)="onModalConfirm()" (closed)="onModalClose()">
   <ng-template #modalContent>
     <h1 *ngIf="tagAction === TagAction.ADD">Add Tag</h1>
     <h1 *ngIf="tagAction === TagAction.EDIT">Edit Tag</h1>

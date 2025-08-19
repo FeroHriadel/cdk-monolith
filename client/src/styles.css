@@ -2,3 +2,13 @@
 .pointer {
   cursor: pointer;
 }
+
+.normalize-text {
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.normalize-icon {
+  transform: translateY(2px);
+}

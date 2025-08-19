@@ -1,4 +1,4 @@
-import { Component, TemplateRef, Output, EventEmitter } from '@angular/core';
+import { Component, TemplateRef, Output, EventEmitter, HostListener } from '@angular/core';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 
@@ -55,9 +55,18 @@ export class ModalComponent {
     this.closed.emit();
   }
 
+  // confirm action
   public confirm() {
     this.visible = false;
     this.confirmed.emit();
+  }
+
+  // close modal on Esc
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      this.close();
+    }
   }
 
 }
