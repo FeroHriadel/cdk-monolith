@@ -36,9 +36,9 @@ export class CategoryService {
   public createCategory(req: CreateCategoryRequest): Observable<CategoryCreateResponse> {
     const formData = new FormData();
     formData.append("Name", req.Name);
-    formData.append("Description", req.Description || '');
+    formData.append("Description", req.Description || 'No description');
     formData.append("File", req.File);
-    return this.http.post<CategoryCreateResponse>(this.apiUrl, formData);
+    return this.http.post<CategoryCreateResponse>(this.apiUrl, formData, { withCredentials: true });
   }
 
   // update category - gets object as request then converts it to FormData
@@ -47,12 +47,16 @@ export class CategoryService {
     if (req.Name) formData.append("Name", req.Name);
     if (req.Description) formData.append("Description", req.Description || '');
     if (req.File) formData.append("File", req.File);
-    return this.http.put<UpdateCategoryResponse>(`${this.apiUrl}/${req.id}`, formData);
+    return this.http.put<UpdateCategoryResponse>(`${this.apiUrl}/${req.id}`, formData, {withCredentials: true});
   }
 
   // delete category - gets id as parameter
   public deleteCategory(id: number): Observable<DeleteCategoryResponse> {
-    return this.http.delete<DeleteCategoryResponse>(`${this.apiUrl}/${id}`);
+    return this.http.delete<DeleteCategoryResponse>(`${this.apiUrl}/${id}`, { withCredentials: true });
+  }
+
+  public setCategories(categories: Category[]): void {
+    this.categories.set(categories);
   }
 
 }

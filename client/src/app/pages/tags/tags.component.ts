@@ -79,7 +79,7 @@ export class TagsPageComponent implements OnInit {
     this.tagsList$ = this.tags$.pipe(map(tags => this.mapTagsToListItems(tags))); // async pipe in html unsubscribes for you
   }
 
-  // init addTagForm
+  // init addTagForm & editTagForm
   private initForms() {
     this.addTagForm = new FormGroup({
       Name: new FormControl('', [Validators.required, Validators.minLength(2)]),
@@ -89,7 +89,7 @@ export class TagsPageComponent implements OnInit {
     });
   }
 
-    // check if form can be submitted
+  // check if form can be submitted
   private canSubmit(form: FormGroup): boolean {
     if (form.disabled) return false;
     if (!this.formService.isFormValid(form)) {

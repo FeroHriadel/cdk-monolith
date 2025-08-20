@@ -3,5 +3,27 @@
   <app-list 
     [items]="categoriesList" 
     [title]="'CATEGORIES'"
+    (onItemAdd)="onItemAdd()"
   ></app-list>
 </div>
+
+
+
+<!-- Modal with create/edit/delete forms -->
+ <app-modal #modalRef (confirmed)="onModalConfirm()" (closed)="onModalClose()">
+  <ng-template #modalContent>
+    
+    <!-- Add Category -->
+    <div *ngIf="categoryAction === CategoryAction.ADD" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Add Category</h2>
+      <br />
+      <p>Please enter a name and a description for the new category</p>
+      <app-form 
+        [formGroup]="addCategoryForm" 
+        [fields]="addCategoryFields"
+        (onSubmit)="onAddCategorySubmit()"
+      ></app-form>
+      <br />
+    </div>
+  </ng-template>
+</app-modal>
