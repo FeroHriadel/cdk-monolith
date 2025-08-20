@@ -1,6 +1,8 @@
-# DOTNET WITH EF TEMPLATE
+# DOTNET API & ANGULAR FRONTEND WITH EF TEMPLATE
 
 Template includes:
+
+DOTNET:
 - dotnet 8 with Entity Framework and Entity Framework Auth
 - MySQL docker compose file to run db locally
 - Program.cs split into extensions
@@ -14,3 +16,15 @@ Template includes:
 - Middleware (Exception, OnActionExecution Filter, Authentication with JWT + Role-base authorization)
 - In Memory Cache (IMemoryCache)
 - MessageBroker (RabbitMQ)
+
+ANGULAR:
+- Signals (user.service, signin.component...)
+- BehaviorSubject & Observable (tag.service, tag.component)
+- Child-Parent communication: @Input, @Output & EventEmmiter (tags.component, list.component, modal.component)
+- Reusable components with dynamic props (form.component, list.component)
+- Inserting components to other components: ng-template & ng-content (modal.component)
+- Route Guards (auth.guard, app.routes)
+- @HostListener (modal.component)
+
+AWS DEPLOYMENT
+

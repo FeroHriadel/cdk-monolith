@@ -1,4 +1,4 @@
-import { Component, TemplateRef, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, TemplateRef, Output, EventEmitter, HostListener, Input } from '@angular/core';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 
@@ -38,6 +38,7 @@ export class ModalComponent {
   @Output() opened = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
   @Output() confirmed = new EventEmitter<void>();
+  @Input() modalButtons = false;
   visible = false;
   modalContent!: TemplateRef<any>;
   

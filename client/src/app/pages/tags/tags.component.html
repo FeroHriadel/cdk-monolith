@@ -1,3 +1,4 @@
+<!-- List of Tags -->
 <div class="container">
   <app-list 
     [items]="(tagsList$ | async) ?? []" 
@@ -8,10 +9,43 @@
   ></app-list>
 </div>
 
+
+
+<!-- Modal with create/edit/delete forms -->
 <app-modal #modalRef (confirmed)="onModalConfirm()" (closed)="onModalClose()">
   <ng-template #modalContent>
-    <h1 *ngIf="tagAction === TagAction.ADD">Add Tag</h1>
-    <h1 *ngIf="tagAction === TagAction.EDIT">Edit Tag</h1>
-    <h1 *ngIf="tagAction === TagAction.DELETE">Delete Tag</h1>
+
+    <!-- Add Tag -->
+    <div *ngIf="tagAction === TagAction.ADD" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Add Tag</h2>
+      <br />
+      <p>Please enter a name for the new tag</p>
+      <app-form 
+        [formGroup]="addTagForm" 
+        [fields]="addTagFields"
+        (onSubmit)="onAddTagSubmit()"
+      ></app-form>
+    </div>
+    
+    <!-- Edit Tag -->
+    <div *ngIf="tagAction === TagAction.EDIT" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Edit Tag</h2>
+      <br />
+      <p>Please enter a new name for the tag</p>
+      <app-form 
+        [formGroup]="editTagForm" 
+        [fields]="editTagFields"
+        (onSubmit)="onEditTagSubmit()"
+      ></app-form>
+    </div>
+
+    <!-- Delete Tag Confirmation -->
+    <div *ngIf="tagAction === TagAction.DELETE" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Delete Tag</h2>
+      <br />
+      <p>Are you sure you want to delete this tag?</p>
+      <br />
+      <button class="btn btn-primary" (click)="onDeleteTagConfirm()">Confirm</button>
+    </div>
   </ng-template>
 </app-modal>

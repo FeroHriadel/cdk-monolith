@@ -14,5 +14,8 @@
     </div>
 
   }
-  <button type="submit" class="btn btn-primary w-100 mt-4" [class.form-disabled]="formGroup.disabled">Submit</button>
+ 
+  @if (showSubmitButton) {
+     <button type="submit" class="btn btn-primary w-100 mt-4" [class.form-disabled]="formGroup.disabled">Submit</button>
+  }
 </form>

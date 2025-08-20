@@ -15,6 +15,7 @@ import { FormField } from '../../models/form.model';
 
 
 export class FormComponent {
+  @Input() showSubmitButton = true;
   /** @required */
   @Input() formGroup!: FormGroup;
   /** @required */

@@ -88,16 +88,15 @@ public class TagsController(ITagRepository tagRepository, ITokenService tokenSer
     if (tag == null) return Error<Tag>(404, "Tag not found");
 
     // update cache
-    await tagCache.InvalidateCacheAsync();
-    var cachedTags = await tagCache.GetTagsAsync();
-    if (cachedTags != null && cachedTags.Any())
+    var cachedTags = await tagCache.GetTagsAsync() ?? new List<Tag>();
+    if (cachedTags.Any())
     {
-      var updatedTags = cachedTags.Select(t => t.Id == tag.Id ? tag : t);
-      await tagCache.UpdateTagsAsync(updatedTags);
+        var updatedTags = cachedTags.Select(t => t.Id == tag.Id ? tag : t).ToList();
+        await tagCache.UpdateTagsAsync(updatedTags);
     }
     else
     {
-      await tagCache.UpdateTagsAsync(new List<Tag> { tag });
+        await tagCache.UpdateTagsAsync(new List<Tag> { tag });
     }
 
     //respond
