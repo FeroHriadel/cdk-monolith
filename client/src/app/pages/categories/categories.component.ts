@@ -166,10 +166,17 @@ export class CategoriesPageComponent implements OnInit {
   // put file selected in input to form control
   public onFileSelected(event: Event) {
     const images = this.imageService.getInputImages({event, numberOfFiles: 1, accept: this.acceptedImageTypes});
-    if (images?.length) this.selectedImage = images[0];
-    else return this.formService.showError('Selected file is not an image and will not be uploaded');
-    this.addCategoryForm.patchValue({ File: this.selectedImage });
-    // this.addCategoryForm.get('File')?.updateValueAndValidity();
+    // if image uploaded
+    if (images?.length) {
+      this.selectedImage = images[0];
+      this.addCategoryForm.patchValue({ File: this.selectedImage });
+    }
+    // if not an image
+    else {
+      this.formService.showError('Selected file is not an image and will not be uploaded');
+      this.selectedImage = null;
+      this.addCategoryForm.patchValue({ File: null });
+    }
   }
 
 }
