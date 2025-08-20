@@ -18,8 +18,9 @@ DOTNET:
 - MessageBroker (RabbitMQ)
 
 ANGULAR:
-- Signals (user.service, signin.component...)
+- Signals (user.service, signin.component, categories.component...)
 - BehaviorSubject & Observable (tag.service, tag.component)
+- Compare the use of BehaviorSubject & Observable (tag.component & service) vs. Signal (category.component & service)
 - Child-Parent communication: @Input, @Output & EventEmmiter (tags.component, list.component, modal.component)
 - Reusable components with dynamic props (form.component, list.component)
 - Inserting components to other components: ng-template & ng-content (modal.component)
