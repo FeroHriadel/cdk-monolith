@@ -10,6 +10,7 @@
         [placeholder]="field.placeholder"
         [formControlName]="field.name"
         [class.is-invalid]="formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched"
+        (change)="field.onFileSelected ? field.onFileSelected($event) : null"
       />
     </div>
 

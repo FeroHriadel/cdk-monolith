@@ -10,6 +10,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { NgIf } from '@angular/common';
 import { FormField } from '../../models/form.model';
 import { CategoryCreateResponse } from '../../models/category.model';
+import { ImageService } from '../../services/image.service';
 
 
 
@@ -44,6 +45,11 @@ export class CategoriesPageComponent implements OnInit {
   public categoryAction: CategoryAction | null = null;
   public editedCategory: Category | null = null; // what category is being edited or deleted
 
+  // image
+  public imageService = inject(ImageService);
+  private acceptedImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+  public selectedImage: File | null = null;
+
   // forms
   public formService = inject(FormService);
   public addCategoryForm: FormGroup = new FormGroup({});
@@ -60,8 +66,14 @@ export class CategoriesPageComponent implements OnInit {
       label: 'Description',
       type: 'text' as 'text',
       placeholder: 'Category description',
-    }
-  ];
+    },
+    {
+      name: 'File',
+      label: 'Picture',
+      type: 'file' as 'file',
+      onFileSelected: (event: Event) => this.onFileSelected(event), 
+      }
+    ];
 
   
   // lifecycle
@@ -112,6 +124,7 @@ export class CategoriesPageComponent implements OnInit {
     this.addCategoryForm = new FormGroup({
       Name: new FormControl('', [Validators.required, Validators.minLength(2)]),
       Description: new FormControl('', []),
+      File: new FormControl(null, [])
     });
   }
 
@@ -148,6 +161,15 @@ export class CategoriesPageComponent implements OnInit {
           this.formService.showError(error?.message || 'Failed to add category');
         }
       });
+  }
+
+  // put file selected in input to form control
+  public onFileSelected(event: Event) {
+    const images = this.imageService.getInputImages({event, numberOfFiles: 1, accept: this.acceptedImageTypes});
+    if (images?.length) this.selectedImage = images[0];
+    else return this.formService.showError('Selected file is not an image and will not be uploaded');
+    this.addCategoryForm.patchValue({ File: this.selectedImage });
+    // this.addCategoryForm.get('File')?.updateValueAndValidity();
   }
 
 }
