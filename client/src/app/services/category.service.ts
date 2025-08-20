@@ -47,7 +47,8 @@ export class CategoryService {
     if (req.Name) formData.append("Name", req.Name);
     if (req.Description) formData.append("Description", req.Description || '');
     if (req.File) formData.append("File", req.File);
-    return this.http.put<UpdateCategoryResponse>(`${this.apiUrl}/${req.id}`, formData, {withCredentials: true});
+    formData.append("Id", req.id.toString());
+    return this.http.put<UpdateCategoryResponse>(`${this.apiUrl}`, formData, {withCredentials: true});
   }
 
   // delete category - gets id as parameter

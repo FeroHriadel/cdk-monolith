@@ -4,6 +4,8 @@
     [items]="categoriesList" 
     [title]="'CATEGORIES'"
     (onItemAdd)="onItemAdd()"
+    (onItemEdit)="onItemEdit($event)"
+    (onItemDelete)="onItemDelete($event)"
   ></app-list>
 </div>
 
@@ -23,6 +25,29 @@
         [fields]="addCategoryFields"
         (onSubmit)="onAddCategorySubmit()"
       ></app-form>
+      <br />
+    </div>
+
+    <!-- Edit Category -->
+    <div *ngIf="categoryAction === CategoryAction.EDIT" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Edit Category</h2>
+      <br />
+      <p>Please enter a new name and description for the category</p>
+      <app-form 
+        [formGroup]="editCategoryForm" 
+        [fields]="editCategoryFields"
+        (onSubmit)="onEditCategorySubmit()"
+      ></app-form>
+      <br />
+    </div>
+
+    <!-- Delete Category -->
+    <div *ngIf="categoryAction === CategoryAction.DELETE" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Delete Category</h2>
+      <br />
+      <p>Are you sure you want to delete the category?</p>
+      <br />
+      <button class="btn btn-primary" (click)="onDeleteCategorySubmit()">Confirm</button>
       <br />
     </div>
   </ng-template>

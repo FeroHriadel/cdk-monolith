@@ -111,4 +111,10 @@ public class CategoryRepository(DataContext context, ITokenService tokenService,
     return category;
   }
 
+  // HELPER - does category have any items?
+  public async Task<bool> HasItemsAsync(int categoryId)
+  {
+    return await context.Items.AnyAsync(i => i.CategoryId == categoryId);
+  }
+
 }

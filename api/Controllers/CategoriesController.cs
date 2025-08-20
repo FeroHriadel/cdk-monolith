@@ -72,6 +72,9 @@ public class CategoriesController(ICategoryRepository categoryRepository, ICateg
   public async Task<ActionResult<ApiResponse<bool>>> DeleteCategory(int id)
   {
     if (id <= 0) return Error<bool>(400, "Invalid category ID");
+    var hasItems = await categoryRepository.HasItemsAsync(id); // check if any items are associated with this category
+    if (hasItems)
+        return Error<bool>(400, "Cannot delete category since it's associated with some items. Delete the items first."); 
     var deleted = await categoryRepository.DeleteAsync(id);
     if (deleted == null) return Error<bool>(404, $"Category with ID {id} not found");
     var cachedCategories = await categoryCacheService.GetCategoriesAsync();

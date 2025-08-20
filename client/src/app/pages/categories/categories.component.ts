@@ -22,13 +22,13 @@ enum CategoryAction {
 
 
 
-
 @Component({
   selector: 'app-categories',
   imports: [ListComponent, ModalComponent, FormComponent, ReactiveFormsModule, NgIf],
   templateUrl: './categories.component.html',
   styleUrl: './categories.component.css'
 })
+
 
 
 
@@ -53,6 +53,7 @@ export class CategoriesPageComponent implements OnInit {
   // forms
   public formService = inject(FormService);
   public addCategoryForm: FormGroup = new FormGroup({});
+  public editCategoryForm: FormGroup = new FormGroup({});
   public addCategoryFields: FormField[] = [
     {
       name: 'Name', 
@@ -74,6 +75,27 @@ export class CategoriesPageComponent implements OnInit {
       onFileSelected: (event: Event) => this.onFileSelected(event), 
       }
     ];
+  public editCategoryFields: FormField[] = [
+    {
+      name: 'Name',
+      label: 'Name',
+      type: 'text' as 'text',
+      placeholder: 'Category name',
+      validators: [Validators.required, Validators.minLength(2)],
+    },
+    {
+      name: 'Description',
+      label: 'Description',
+      type: 'text' as 'text',
+      placeholder: 'Category description',
+    },
+    {
+      name: 'File',
+      label: 'Add new picture',
+      type: 'file' as 'file',
+      onFileSelected: (event: Event) => this.onFileSelected(event),
+    }
+  ];
 
   
   // lifecycle
@@ -103,6 +125,21 @@ export class CategoriesPageComponent implements OnInit {
     this.modal.open(this.modalContent);
   }
 
+  // user clicks edit icon in <app-list>
+  public onItemEdit(item: ListItem) {
+    this.categoryAction = CategoryAction.EDIT;
+    this.editedCategory = item.value;
+    this.editCategoryForm.patchValue({ Name: item.value.name, Description: item.value.description });
+    this.modal.open(this.modalContent);
+  }
+
+  // user clicks delete icon in <app-list>
+  public onItemDelete(item: ListItem) {
+    this.categoryAction = CategoryAction.DELETE;
+    this.editedCategory = item.value;
+    this.modal.open(this.modalContent);
+  }
+
   // user confirmed the modal
   public onModalConfirm() {
     console.log('Modal confirmed');
@@ -122,6 +159,11 @@ export class CategoriesPageComponent implements OnInit {
   // init addCategoryForm & editCategoryForm
   private initForms() {
     this.addCategoryForm = new FormGroup({
+      Name: new FormControl('', [Validators.required, Validators.minLength(2)]),
+      Description: new FormControl('', []),
+      File: new FormControl(null, [])
+    });
+    this.editCategoryForm = new FormGroup({
       Name: new FormControl('', [Validators.required, Validators.minLength(2)]),
       Description: new FormControl('', []),
       File: new FormControl(null, [])
@@ -163,15 +205,52 @@ export class CategoriesPageComponent implements OnInit {
       });
   }
 
-  // put file selected in input to form control
+  // user submits edit category
+  public onEditCategorySubmit() {
+    if (!this.canSubmit(this.editCategoryForm)) return;
+    this.toggleLoading(this.editCategoryForm);
+    this.categoryService.updateCategory({ id: this.editedCategory!.id, ...this.editCategoryForm.value })
+      .subscribe({
+        next: (res: CategoryCreateResponse) => {
+          this.categoryService.setCategories(this.categories.map(category => category.id === res.data.id ? res.data : category));
+          this.toggleLoading(this.editCategoryForm);
+          this.editCategoryForm.reset();
+          this.clearEditMode();
+          this.modal.close();
+        },
+        error: (error) => {
+          this.toggleLoading(this.editCategoryForm);
+          this.formService.showError(error?.message || 'Failed to edit category');
+        }
+      });
+  }
+
+  // user confirms delete category
+  public onDeleteCategorySubmit() {
+    if (!this.editedCategory) return;
+    this.categoryService.deleteCategory(this.editedCategory.id)
+      .subscribe({
+        next: () => {
+          this.categoryService.setCategories(this.categories.filter(category => category.id !== this.editedCategory!.id));
+          this.clearEditMode();
+          this.modal.close();
+        },
+        error: (error) => {
+          console.log(error)
+          this.formService.showError(error?.error?.message || 'Failed to delete category');
+        }
+      });
+  }
+
+  // put file which user selected in input to form control
   public onFileSelected(event: Event) {
     const images = this.imageService.getInputImages({event, numberOfFiles: 1, accept: this.acceptedImageTypes});
-    // if image uploaded
+    // if user uploaded image
     if (images?.length) {
       this.selectedImage = images[0];
       this.addCategoryForm.patchValue({ File: this.selectedImage });
     }
-    // if not an image
+    // if user uploaded a file which is not an image
     else {
       this.formService.showError('Selected file is not an image and will not be uploaded');
       this.selectedImage = null;
