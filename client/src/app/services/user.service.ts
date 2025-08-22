@@ -63,4 +63,8 @@ export class UserService {
     this.user.set(null);
   }
 
+  getUserRoles() {
+    return this.user()?.roles;
+  }
+
 }

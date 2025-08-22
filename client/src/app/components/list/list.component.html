@@ -1,9 +1,9 @@
 <ul class="list-group list-group-flush container">
-  <!-- Title -->
+  <!-- Title  & Add Button -->
   <li class="list-group-item d-flex justify-content-between align-items-center bg-light list-header">
     <h4 class="text-muted">{{ title }}</h4>
     @if (onItemAdd.observers.length > 0) { 
-      <button class="btn btn-primary btn-sm" (click)="onItemAdd.emit()">
+      <button *appHasRole="['Admin', 'User']" class="btn btn-primary btn-sm" (click)="onItemAdd.emit()">
         <ng-icon name="bootstrapPlus" class="normalize-icon fs-4"></ng-icon>
       </button> }
   </li>
@@ -14,11 +14,11 @@
        <span>{{ item.label }}</span>
        <span class="">
           @if (onItemEdit.observers.length > 0) { 
-            <button class="btn btn-secondary btn-sm mx-1" (click)="onItemEdit.emit(item)">
+            <button *appHasRole="['Admin', 'User']" class="btn btn-secondary btn-sm mx-1" (click)="onItemEdit.emit(item)">
               <ng-icon name="bootstrapPencil" class="normalize-icon"></ng-icon>
             </button> }
           @if (onItemDelete.observers.length > 0) { 
-            <button class="btn btn-secondary btn-sm" (click)="onItemDelete.emit(item)">
+            <button *appHasRole="['Admin', 'User']" class="btn btn-secondary btn-sm" (click)="onItemDelete.emit(item)">
               <ng-icon name="bootstrapTrash" class="normalize-icon"></ng-icon>
             </button> }
        </span>

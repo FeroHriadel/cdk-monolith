@@ -26,6 +26,7 @@ ANGULAR:
 - Inserting components to other components: ng-template & ng-content (modal.component)
 - Route Guards (auth.guard, app.routes)
 - @HostListener (modal.component)
+- Custom Directive (*appHasRole="['Admin', 'User']") has-role.directive.ts
 
 AWS DEPLOYMENT
 

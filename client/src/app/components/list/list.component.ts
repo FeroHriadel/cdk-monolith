@@ -2,12 +2,13 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ListItem } from '../../models/list.model';
 import { NgIconsModule } from '@ng-icons/core';
 import { bootstrapPencil, bootstrapPlus, bootstrapTrash } from '@ng-icons/bootstrap-icons';
+import { HasRoleDirective } from '../../directives/has-role.directive';
 
 
 
 @Component({
   selector: 'app-list',
-  imports: [NgIconsModule],
+  imports: [NgIconsModule, HasRoleDirective],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
   host: {}

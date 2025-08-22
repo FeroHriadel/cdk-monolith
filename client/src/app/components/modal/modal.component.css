@@ -11,7 +11,7 @@
 .dialog {
   position: relative;
   background: #fff;
-  min-width: 75vw;
+  min-width: 50vw;
   max-width: 97vw;
   max-height: 90vh;
   min-height: 25vh;

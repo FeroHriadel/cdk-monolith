@@ -127,7 +127,7 @@ export class TagsPageComponent implements OnInit {
         },
         error: (error) => {
           this.toggleLoading(this.addTagForm);
-          this.formService.showError(error?.message ||'Failed to add tag');
+          this.formService.showError(error?.error?.message || 'Failed to delete tag');
         }
       });
   }
@@ -147,7 +147,7 @@ export class TagsPageComponent implements OnInit {
         },
         error: (error) => {
           this.toggleLoading(this.editTagForm);
-          this.formService.showError(error?.message ||'Failed to edit tag');
+          this.formService.showError(error?.error?.message ||'Failed to edit tag');
         }
     });
   }
@@ -161,7 +161,7 @@ export class TagsPageComponent implements OnInit {
         this.modal.close();
       },
       error: (error) => {
-        this.formService.showError(error?.message || 'Failed to delete tag');
+        this.formService.showError(error?.error?.message || 'Failed to delete tag');
       }
     });
   }
