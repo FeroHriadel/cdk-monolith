@@ -1,4 +1,40 @@
+<!-- List of items-->
 <app-list 
   [items]="itemsList" 
   title="ITEMS"
+  (onItemEdit)="onItemEdit($event)"
+  (onItemAdd)="onItemAdd()"
+  (onItemDelete)="onItemDelete($event)"
 ></app-list>
+
+
+
+<!-- modal to add/delete/update an item -->
+<app-modal #modalRef>
+  <ng-template #modalContent>
+
+  <!-- add item -->
+   <div *ngIf="itemAction === ItemAction.ADD" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Add Item</h2>
+      <br />
+      <p>Please enter a name and a description for the new item</p>
+      <app-form 
+        [formGroup]="addItemForm" 
+        [fields]="addItemFields"
+        (onSubmit)="onAddItemSubmit()"
+      ></app-form>
+      <br />
+  </div>
+
+  <!-- delete item -->
+   <div *ngIf="itemAction === ItemAction.DELETE" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Delete Item</h2>
+      <br />
+      <p>Are you sure you want to delete the item?</p>
+      <br />
+      <button class="btn btn-primary" (click)="onDeleteItemSubmit()">Confirm</button>
+      <br />
+    </div>
+
+  </ng-template>
+</app-modal>

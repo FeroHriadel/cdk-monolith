@@ -1,17 +1,39 @@
 <form [formGroup]="formGroup" class="w-100" (ngSubmit)="onSubmit.emit()">
+
+  <!-- loop thru fields and render input/select/... -->
   @for (field of fields; track field.name) {
 
     <div class="mb-3 w-100">
+      <!-- label -->
       <label [for]="field.name" class="form-label" [class.form-disabled]="formGroup.disabled">{{ field.label }}</label>
-      <input
-        [type]="field.type"
-        [id]="field.name"
-        class="form-control w-100"
-        [placeholder]="field.placeholder"
-        [formControlName]="field.name"
-        [class.is-invalid]="formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched"
-        (change)="field.onFileSelected ? field.onFileSelected($event) : null"
-      />
+
+      <!-- if input field -->
+      @if (field.type !== 'select') {
+        <input
+          [type]="field.type"
+          [id]="field.name"
+          class="form-control w-100"
+          [placeholder]="field.placeholder"
+          [formControlName]="field.name"
+          [class.is-invalid]="formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched"
+          (change)="field.onFileSelected ? field.onFileSelected($event) : null"
+        />
+      }
+
+      <!-- if select -->
+       @if (field.type === 'select') {
+        <select
+          [id]="field.name"
+          class="form-select w-100"
+          [formControlName]="field.name"
+          [class.is-invalid]="formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched"
+        >
+          <option value="">Select an option</option>
+          @for (option of field.options; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      }
     </div>
 
   }

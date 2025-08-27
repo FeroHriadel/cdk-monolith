@@ -25,3 +25,15 @@ export interface GetItemsResponse {
   message: string;
 }
 
+export interface CreateItemRequest {
+  Name: string;
+  Description: string;
+  CategoryId: string;
+  TagIds: string[];
+}
+
+export interface CreateItemResponse {
+  data: Item;
+  statusCode: number;
+  message: string;
+}

@@ -200,7 +200,7 @@ export class CategoriesPageComponent implements OnInit {
         },
         error: (error) => {
           this.toggleLoading(this.addCategoryForm);
-          this.formService.showError(error?.message || 'Failed to add category');
+          this.formService.showError(error?.error?.message || 'Failed to add category');
         }
       });
   }

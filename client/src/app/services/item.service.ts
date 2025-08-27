@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from "@angular/core";
 import { map } from "rxjs/operators";
 import { environment } from "../environments/environment";
 import { BehaviorSubject, Observable } from "rxjs";
-import { Item, GetItemsQueryStringAsObject, GetItemsResponse } from "../models/item.model";
+import { Item, GetItemsQueryStringAsObject, GetItemsResponse, CreateItemRequest, CreateItemResponse } from "../models/item.model";
 import { ListItem } from "../models/list.model";
 
 
@@ -27,7 +27,7 @@ export class ItemService {
 
   // get Items from api, set items signal and return nothing
   public getItems(queryStringObj?: GetItemsQueryStringAsObject): void {
-    const queryString: string = queryStringObj ? this.mapObjectToQueryString(queryStringObj) : '';
+    const queryString: string = queryStringObj ? this.mapGetItemsObjectToQueryString(queryStringObj) : '';
     this.http.get<GetItemsResponse>(this.apiUrl + queryString)
       .subscribe({
         next: response => {
@@ -46,11 +46,25 @@ export class ItemService {
   }
 
   // Map query string as object {pageSize: 20, ...} to query string ?pageSize=20&...
-  private mapObjectToQueryString(obj: GetItemsQueryStringAsObject): string {
+  private mapGetItemsObjectToQueryString(obj: GetItemsQueryStringAsObject): string {
     const queryString = Object.keys(obj)
       .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(String(obj[key]))}`)
       .join('&');
     return `?${queryString}`;
   }
 
+  // Create a new item
+  public createItem(request: CreateItemRequest): Observable<CreateItemResponse> {
+    const formData = new FormData();
+    formData.append('Name', request.Name);
+    formData.append('Description', request.Description || 'No description');
+    request.CategoryId && formData.append('CategoryId', String(request.CategoryId));
+    request.TagIds?.length && request.TagIds.forEach(id => formData.append('tagIds', id));
+    return this.http.post<CreateItemResponse>(this.apiUrl, formData, {withCredentials: true});
+  }
+
+  // Delete Item
+  public deleteItem(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, {withCredentials: true});
+  }
 }
