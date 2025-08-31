@@ -1,4 +1,4 @@
-import { Directive, inject, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, inject, Input, OnDestroy, TemplateRef, ViewContainerRef, effect } from '@angular/core';
 import { UserService } from '../services/user.service';
 
 
@@ -9,23 +9,25 @@ import { UserService } from '../services/user.service';
 
 
 
-export class HasRoleDirective implements OnInit {
+export class HasRoleDirective implements OnDestroy {
   @Input() appHasRole: string[] = [];
   private userService = inject(UserService);
   private templateRef = inject(TemplateRef);
   private viewContainerRef = inject(ViewContainerRef);
 
 
-  ngOnInit() {
-    if (this.hasRequiredRoles()) this.viewContainerRef.createEmbeddedView(this.templateRef);
-    else this.viewContainerRef.clear();
-  }
+  // effect to manage the view based on user roles
+  private destroyEffect = effect(() => {
+    const user = this.userService.user();
+    const hasRole = user && this.appHasRole.some(role => user.roles?.includes(role));
+    this.viewContainerRef.clear();
+    if (hasRole) { this.viewContainerRef.createEmbeddedView(this.templateRef); }
+  });
 
 
-  // check if user has any of the required roles
-  private hasRequiredRoles(): boolean {
-    const userRoles = this.userService.getUserRoles();
-    return this.appHasRole.some(role => userRoles?.includes(role));
+  // cleanup
+  ngOnDestroy() {
+    this.destroyEffect.destroy();
   }
 
 }

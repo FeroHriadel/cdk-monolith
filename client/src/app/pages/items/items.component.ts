@@ -171,6 +171,7 @@ export class ItemsPageComponent implements OnInit {
       });
   }
 
+  // user confirms deletion
   public onDeleteItemSubmit(): void {
     if (!this.editedItem) return;
     this.itemsService.deleteItem(this.editedItem.id)
