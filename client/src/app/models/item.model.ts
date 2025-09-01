@@ -30,9 +30,24 @@ export interface CreateItemRequest {
   Description: string;
   CategoryId: string;
   TagIds: string[];
+  Images: File | null;
 }
 
 export interface CreateItemResponse {
+  data: Item;
+  statusCode: number;
+  message: string;
+}
+
+export interface UpdateItemRequest {
+  Name?: string;
+  Description?: string;
+  CategoryId?: string;
+  TagIds?: string[];
+  Images?: File | null;
+}
+
+export interface UpdateItemResponse {
   data: Item;
   statusCode: number;
   message: string;

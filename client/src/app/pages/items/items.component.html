@@ -10,7 +10,7 @@
 
 
 <!-- modal to add/delete/update an item -->
-<app-modal #modalRef>
+<app-modal #modalRef (closed)="clearEditMode()">
   <ng-template #modalContent>
 
     <!-- add item -->
@@ -25,6 +25,19 @@
       ></app-form>
       <br />
   </div>
+
+  <!-- edit item -->
+   <div *ngIf="itemAction === ItemAction.EDIT" class="d-flex flex-column justify-content-center align-items-center">
+      <h2>Edit Item</h2>
+      <br />
+      <p>Please update the details for the item</p>
+      <app-form 
+        [formGroup]="editItemForm" 
+        [fields]="editItemFields"
+        (onSubmit)="onEditItemSubmit()"
+      ></app-form>
+      <br />
+    </div>
 
     <!-- delete item -->
    <div *ngIf="itemAction === ItemAction.DELETE" class="d-flex flex-column justify-content-center align-items-center">

@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from "@angular/core";
 import { map } from "rxjs/operators";
 import { environment } from "../environments/environment";
 import { BehaviorSubject, Observable } from "rxjs";
-import { Item, GetItemsQueryStringAsObject, GetItemsResponse, CreateItemRequest, CreateItemResponse } from "../models/item.model";
+import { Item, GetItemsQueryStringAsObject, GetItemsResponse, CreateItemRequest, CreateItemResponse, UpdateItemResponse, UpdateItemRequest } from "../models/item.model";
 import { ListItem } from "../models/list.model";
 
 
@@ -60,7 +60,19 @@ export class ItemService {
     formData.append('Description', request.Description || 'No description');
     request.CategoryId && formData.append('CategoryId', String(request.CategoryId));
     request.TagIds?.length && request.TagIds.forEach(id => formData.append('tagIds', id));
+    request.Images && formData.append('Images', request.Images);
     return this.http.post<CreateItemResponse>(this.apiUrl, formData, {withCredentials: true});
+  }
+
+  // Update Item
+  public updateItem(id: number, request: UpdateItemRequest): Observable<UpdateItemResponse> {
+    const formData = new FormData();
+    request.Name && formData.append('Name', request.Name);
+    request.Description && formData.append('Description', request.Description);
+    request.CategoryId && formData.append('CategoryId', String(request.CategoryId));
+    request.TagIds?.length && request.TagIds.forEach(id => formData.append('tagIds', id));
+    request.Images && formData.append('Images', request.Images);
+    return this.http.put<UpdateItemResponse>(`${this.apiUrl}/${id}`, formData, {withCredentials: true});
   }
 
   // Delete Item

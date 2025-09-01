@@ -15,8 +15,8 @@ import { MultiselectProps } from '../../models/multiselect.model';
 export class MultiselectComponent {
   @Input() props!: MultiselectProps;
   public isOpen: boolean = false;
-  
 
+  
   public onItemClick(item: any): void {
     if (!this.props.onItemClick) throw new Error('onItemClick is not defined (multiselect.component)');
     this.props.onItemClick(item);

@@ -11,8 +11,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FormComponent } from '../../components/form/form.component';
 import { NgIf } from '@angular/common';
 import { Tag } from '../../models/tag.model';
-import { map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { ImageService } from '../../services/image.service';
 
 
 
@@ -41,7 +41,12 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
   public ItemAction = ItemAction;
   public itemAction: ItemAction | null = null;
   public editedItem: Item | null = null;
-  
+
+  // image
+  public imageService = inject(ImageService);
+  private acceptedImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+  public selectedImage: File | null = null;
+
   //categories
   private categoryService: CategoryService = inject(CategoryService);
   public categoriesForSelect: { label: string; value: string }[] = [];
@@ -58,6 +63,7 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
   // forms
   public formService: FormService = inject(FormService);
   public addItemForm: FormGroup = new FormGroup({});
+  public editItemForm: FormGroup = new FormGroup({});
   public addItemFields = [
     {
       name: 'Name',
@@ -87,8 +93,15 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
       options: [] as { label: string; value: Tag }[], //will be populated from tagService
       title: 'Select tags',
       onItemClick: (item: Tag) => this.onTagSelect(item)
+    },
+    {
+      name: 'Images',
+      label: 'Image',
+      type: 'file' as 'file',
+      onFileSelected: (event: Event) => this.onFileSelected(event)
     }
-  ]
+  ];
+  public editItemFields = [...this.addItemFields];
 
 
   // effects (run everytime cb dependencies change)
@@ -119,6 +132,7 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
     this.itemsList = this.itemsService.mapItemsToListItems(this.items);
   }
 
+  // populate categories for select
   private populateCategoriesForSelect(): void {
     //map categories to select options
     this.categoriesForSelect = this.categoryService.categories().map(category => ({
@@ -129,6 +143,7 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
     this.addItemFields[2].options = this.categoriesForSelect;
   }
 
+  // populate tags for multiselect
   public populateTags() {
     this.tagsSubscription = this.tagService.tags$.subscribe(tags => {
       this.addItemFields[3].options = tags.map(tag => ({
@@ -138,22 +153,43 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  // user selected a tag
   public onTagSelect(tag: Tag) {
     if (this.selectedTags.find(t => t.id === tag.id)) {
       this.selectedTags = [...this.selectedTags.filter(t => t.id !== tag.id)];
     } else {
       this.selectedTags = [...this.selectedTags, tag];
     }
-    this.addItemFields[3].selectedItems = this.selectedTags; //if you assign a new array reference, Angular will detect the change and update itn for the child
+    this.addItemFields[3].selectedItems = this.selectedTags; //if you assign a new array reference, Angular will detect the change and update it for the child
   }
 
+  // put file which user selected in input to form control
+  public onFileSelected(event: Event) {
+    const images = this.imageService.getInputImages({event, numberOfFiles: 1, accept: this.acceptedImageTypes});
+    // if user uploaded image
+    if (images?.length) {
+      this.selectedImage = images[0];
+    }
+    // if user uploaded a file which is not an image
+    else {
+      this.formService.showError('Selected file is not an image and will not be uploaded');
+      this.selectedImage = null;
+    }
+  }
 
   // initialize edit & add forms
   private initForms(): void {
     this.addItemForm = this.addItemForm = new FormGroup({
       Name: new FormControl('', [Validators.required, Validators.minLength(2)]),
       Description: new FormControl('', []),
-      CategoryId: new FormControl('', [Validators.required])
+      CategoryId: new FormControl('', [Validators.required]),
+      Images: new FormControl(null, [])
+    });
+    this.editItemForm = new FormGroup({
+      Name: new FormControl('', [Validators.required, Validators.minLength(2)]),
+      Description: new FormControl('', []),
+      CategoryId: new FormControl('', [Validators.required]),
+      Images: new FormControl(null, [])
     });
   }
 
@@ -164,8 +200,19 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
   }
 
   // user click on edit icon in <app-list>
-  public onItemEdit(item: ListItem): void {}
-
+  public onItemEdit(item: ListItem): void {
+    console.log('Editing item:', item);
+    this.itemAction = ItemAction.EDIT;
+    this.editedItem = item.value;
+    this.editItemForm.patchValue({
+      Name: item.value.name,
+      Description: item.value.description,
+      CategoryId: item.value.categoryId,
+    });
+    this.selectedTags = item.value.tags || [];
+    this.editItemFields[3].selectedItems = this.selectedTags;
+    this.modal.open(this.modalContent);
+  }
 
   // user click on delete icon in <app-list>
   public onItemDelete(item: ListItem): void {
@@ -175,9 +222,11 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
   }
 
   // clear itemAction and editedItem
-  private clearEditMode() {
+  public clearEditMode() {
     this.itemAction = null;
     this.editedItem = null;
+    this.selectedTags = [];
+    this.addItemForm.reset();
   }
 
   // check - can form be submitted?
@@ -199,12 +248,17 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
   public onAddItemSubmit(): void {
     if (!this.canSubmit(this.addItemForm)) return;
     this.toggleLoading(this.addItemForm);
-    this.itemsService.createItem({...this.addItemForm.value, CategoryId: this.addItemForm.value.CategoryId})
+    this.itemsService.createItem({
+      ...this.addItemForm.value, 
+      CategoryId: this.addItemForm.value.CategoryId,
+      TagIds: this.selectedTags.map(t => t.id),
+      Images: this.selectedImage
+    })
       .subscribe({
         next: response => {
           this.itemsService.setItems([...this.items, response.data]);
           this.toggleLoading(this.addItemForm);
-          this.addItemForm.reset();
+          this.selectedImage = null;
           this.clearEditMode();
           this.modal.close();
         },
@@ -213,6 +267,11 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
           this.formService.showError(err?.error?.message || 'Failed to create item');
         },
       });
+  }
+
+  // user submits edit item form
+  public onEditItemSubmit(): void {
+    console.log(this.editItemForm.value, this.selectedTags, this.selectedImage);
   }
 
   // user confirms deletion
