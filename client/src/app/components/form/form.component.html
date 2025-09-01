@@ -8,7 +8,7 @@
       <label [for]="field.name" class="form-label" [class.form-disabled]="formGroup.disabled">{{ field.label }}</label>
 
       <!-- if input field -->
-      @if (field.type !== 'select') {
+      @if (field.type !== 'select' && field.type !== 'multiselect') {
         <input
           [type]="field.type"
           [id]="field.name"
@@ -21,7 +21,7 @@
       }
 
       <!-- if select -->
-       @if (field.type === 'select') {
+      @if (field.type === 'select') {
         <select
           [id]="field.name"
           class="form-select w-100"
@@ -33,6 +33,19 @@
             <option [value]="option.value">{{ option.label }}</option>
           }
         </select>
+      }
+
+      <!-- if multiselect -->
+      @if (field.type === 'multiselect') {
+        <app-multiselect 
+          [props]="{ 
+            title: field.title!, 
+            items: field.options!, 
+            selectedItems: field.selectedItems!, 
+            onItemClick: field.onItemClick!
+          }"
+        >
+        </app-multiselect>
       }
     </div>
 

@@ -1,0 +1,17 @@
+<div class="wrap">
+  <div class="multiselect-switch form-select w-100" (click)="toggleOpen()">{{props.title}}</div>
+  @if (isOpen) {
+    <div class="multiselect-items w-100">
+      @for (item of props.items; track item.value.id) {
+        <div
+          class="multiselect-item pointer"
+          [class.selected]="isSelected(item.value)"
+          (click)="onItemClick(item.value)"
+        >
+          {{item.label}}
+        </div>
+      }
+    </div>
+  }
+</div>
+

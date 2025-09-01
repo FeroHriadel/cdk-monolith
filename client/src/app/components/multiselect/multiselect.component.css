@@ -1,0 +1,33 @@
+.wrap {
+  width: 100%;
+  position: relative;
+}
+
+.multiselect-switch {
+  margin: 0;
+}
+
+.multiselect-items {
+  text-indent: 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  background-color: var(--bs-body-bg);
+  border-radius: var(--bs-border-radius);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  position: absolute;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.multiselect-item {
+  line-height: 2;
+  font-weight: 400;
+  background-color: var(--bs-body-bg);
+  width: 100%;
+  user-select: none;
+}
+
+.selected {
+  background-color: #aaa;
+}

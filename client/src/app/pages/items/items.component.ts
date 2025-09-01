@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, effect, inject, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ItemService } from '../../services/item.service';
 import { Item } from '../../models/item.model';
 import { ListItem } from '../../models/list.model';
@@ -6,9 +6,13 @@ import { ListComponent } from '../../components/list/list.component';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { FormService } from '../../services/form.service';
 import { CategoryService } from '../../services/category.service';
+import { TagService } from '../../services/tag.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FormComponent } from '../../components/form/form.component';
 import { NgIf } from '@angular/common';
+import { Tag } from '../../models/tag.model';
+import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 
 
@@ -17,7 +21,6 @@ enum ItemAction {
   EDIT = 'EDIT',
   DELETE = 'DELETE',
 }
-
 
 
 
@@ -30,7 +33,7 @@ enum ItemAction {
 
 
 
-export class ItemsPageComponent implements OnInit {
+export class ItemsPageComponent implements OnInit, OnDestroy {
   //items
   private itemsService: ItemService = inject(ItemService);
   public items: Item[] = [];
@@ -42,6 +45,11 @@ export class ItemsPageComponent implements OnInit {
   //categories
   private categoryService: CategoryService = inject(CategoryService);
   public categoriesForSelect: { label: string; value: string }[] = [];
+
+  //tags
+  private tagService: TagService = inject(TagService);
+  private tagsSubscription: Subscription | undefined;
+  private selectedTags: Tag[] = [];
 
   // modal
   @ViewChild('modalRef') modal!: ModalComponent;
@@ -70,21 +78,39 @@ export class ItemsPageComponent implements OnInit {
       label: 'Category',
       type: 'select' as 'select',
       options: this.categoriesForSelect
+    },
+    {
+      name: 'Tags',
+      label: 'Tags',
+      type: 'multiselect' as 'multiselect',
+      selectedItems: this.selectedTags,
+      options: [] as { label: string; value: Tag }[], //will be populated from tagService
+      title: 'Select tags',
+      onItemClick: (item: Tag) => this.onTagSelect(item)
     }
   ]
 
 
-  // on mount
+  // effects (run everytime cb dependencies change)
+  private itemsEffect = effect(() => this.populateItems());
+  private categoriesEffect = effect(() => this.populateCategoriesForSelect());
+  private tagsEffect = effect(() => this.populateTags());
+
+
+  // lifecycle
   ngOnInit(): void {
     this.itemsService.getItems();
     this.categoryService.getCategories();
+    this.tagService.fetchTags();
     this.initForms();
   }
 
-
-  // effects (runs everytime cb dependencies change)
-  private itemsEffect = effect(() => this.populateItems());
-  private categoriesEffect = effect(() => this.populateCategoriesForSelect());
+  ngOnDestroy(): void {
+    this.itemsEffect.destroy();
+    this.categoriesEffect.destroy();
+    this.tagsEffect.destroy();
+    this.tagsSubscription?.unsubscribe();
+  }
 
 
   // populate items & itemList for <app-list>
@@ -101,6 +127,24 @@ export class ItemsPageComponent implements OnInit {
     }));
     //update select field options
     this.addItemFields[2].options = this.categoriesForSelect;
+  }
+
+  public populateTags() {
+    this.tagsSubscription = this.tagService.tags$.subscribe(tags => {
+      this.addItemFields[3].options = tags.map(tag => ({
+        label: tag.name,
+        value: tag
+      }));
+    });
+  }
+
+  public onTagSelect(tag: Tag) {
+    if (this.selectedTags.find(t => t.id === tag.id)) {
+      this.selectedTags = [...this.selectedTags.filter(t => t.id !== tag.id)];
+    } else {
+      this.selectedTags = [...this.selectedTags, tag];
+    }
+    this.addItemFields[3].selectedItems = this.selectedTags; //if you assign a new array reference, Angular will detect the change and update itn for the child
   }
 
 

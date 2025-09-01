@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, effect, ViewChild, TemplateRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect, ViewChild, TemplateRef } from '@angular/core';
 import { CategoryService } from '../../services/category.service';
 import { ListComponent } from '../../components/list/list.component';
 import { Category } from '../../models/category.model';
@@ -32,7 +32,7 @@ enum CategoryAction {
 
 
 
-export class CategoriesPageComponent implements OnInit {
+export class CategoriesPageComponent implements OnInit, OnDestroy {
   // modal
   @ViewChild('modalRef') modal!: ModalComponent;
   @ViewChild('modalContent') modalContent!: TemplateRef<any>;
@@ -98,16 +98,19 @@ export class CategoriesPageComponent implements OnInit {
   ];
 
   
+  // effects
+  private categoriesEffect = effect(() => this.populateCategories());
+  
+
   // lifecycle
   ngOnInit(): void {
     this.categoryService.getCategories();
     this.initForms();
   }
 
-
-  // effects
-  private categoriesEffect = effect(() => this.populateCategories());
-
+  ngOnDestroy(): void {
+    this.categoriesEffect.destroy();
+  }
 
   // populate categories & map them to categoriesList for <app-list> component
   private populateCategories() {
