@@ -1,6 +1,6 @@
-<div class="backdrop" *ngIf="visible" @fadeBackdrop (click)="close()">
+<div class="backdrop" *ngIf="visible" @fadeBackdrop (click)="onBackdropClick($event)">
 
-	<div class="dialog" @fadeDialog (click)="$event.stopPropagation()">
+	<div class="dialog" @fadeDialog>
 		<!-- close button -->
     <button class="close-btn" (click)="close()">✕</button>
 

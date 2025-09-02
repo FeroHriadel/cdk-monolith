@@ -1,4 +1,4 @@
-import { Component, TemplateRef, Output, EventEmitter, HostListener, Input } from '@angular/core';
+import { Component, TemplateRef, Output, EventEmitter, HostListener, Input, ElementRef } from '@angular/core';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 
@@ -41,6 +41,12 @@ export class ModalComponent {
   @Input() modalButtons = false;
   visible = false;
   modalContent!: TemplateRef<any>;
+  public elementRef: ElementRef;
+
+  
+  constructor(elementRef: ElementRef) {
+    this.elementRef = elementRef;
+  }
   
 
   // open modal
@@ -68,6 +74,11 @@ export class ModalComponent {
     if (event.key === 'Escape') {
       this.close();
     }
+  }
+
+  public onBackdropClick(event: MouseEvent): void {
+    const dialog = this.elementRef.nativeElement.querySelector('.dialog');
+    if (!dialog.contains(event.target as Node)) this.close();
   }
 
 }
