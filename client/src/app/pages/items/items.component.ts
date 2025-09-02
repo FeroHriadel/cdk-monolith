@@ -227,6 +227,7 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
     this.editedItem = null;
     this.selectedTags = [];
     this.addItemForm.reset();
+    this.selectedImage = null;
   }
 
   // check - can form be submitted?
@@ -258,8 +259,8 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
         next: response => {
           this.itemsService.setItems([...this.items, response.data]);
           this.toggleLoading(this.addItemForm);
-          this.selectedImage = null;
           this.clearEditMode();
+          this.formService.showSuccess('Item created successfully');
           this.modal.close();
         },
         error: err => {
@@ -271,7 +272,28 @@ export class ItemsPageComponent implements OnInit, OnDestroy {
 
   // user submits edit item form
   public onEditItemSubmit(): void {
-    console.log(this.editItemForm.value, this.selectedTags, this.selectedImage);
+    if (!this.canSubmit(this.editItemForm)) return;
+    this.toggleLoading(this.editItemForm);
+    this.itemsService.updateItem(
+      this.editedItem!.id, 
+      { 
+        ...this.editItemForm.value, 
+        TagIds: this.selectedTags.map(t => t.id), 
+        Images: this.selectedImage
+      })
+      .subscribe({
+        next: response => {
+          this.itemsService.setItems(this.items.map(i => i.id === response.data.id ? response.data : i));
+          this.toggleLoading(this.editItemForm);
+          this.clearEditMode();
+          this.formService.showSuccess('Item updated successfully');
+          this.modal.close();
+        },
+        error: err => {
+          this.toggleLoading(this.editItemForm);
+          this.formService.showError(err?.error?.message || 'Failed to update item');
+        },
+      });
   }
 
   // user confirms deletion
