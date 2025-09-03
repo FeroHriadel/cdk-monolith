@@ -69,3 +69,8 @@ $RECYCLE.BIN/
 # Optional: Ignore solution if you track only projects
 # (Uncomment if you don't want the solution file in git)
 # *.sln
+
+# Angular build output
+api/wwwroot/browser
+api/wwwroot/prerendered-routes.json
+api/wwwroot/3rdpartylicenses.txt
