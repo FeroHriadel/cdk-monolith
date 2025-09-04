@@ -1,4 +1,6 @@
-# DOTNET API & ANGULAR FRONTEND WITH EF TEMPLATE
+## AWS MONOLITHIC DEPLOYMENT OF
+### DOTNET + EF API
+### ANGULAR 
 
 Template includes:
 
@@ -28,5 +30,6 @@ ANGULAR:
 - @HostListener (modal.component)
 - Custom Directive (*appHasRole="['Admin', 'User']") has-role.directive.ts
 
-AWS DEPLOYMENT
+AWS DEPLOYMENT:
+- RDS + Bastion
 

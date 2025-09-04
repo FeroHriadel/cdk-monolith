@@ -82,7 +82,6 @@ deployment/*.js
 deployment/!jest.config.js
 deployment/*.d.ts
 deployment/node_modules
-deployment/
 deployment/.cdk.staging
 deployment/cdk.out
 deployment/.env
