@@ -29,10 +29,17 @@ export class AppBastion extends Construct {
   }
 
   private createSecurityGroup() {
+    // allow outbound traffic from the bastion host
     this.bastionSecurityGroup = new ec2.SecurityGroup(this, 'MonolithBastionSG', {
       vpc: this.vpc,
       allowAllOutbound: true,
     });
+    // allow SSH access to the bastion host from anywhere
+    this.bastionSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(), //this should really be just your IP
+      ec2.Port.tcp(22),
+      'Allow SSH access from anywhere'
+    );
   }
 
   private createBastion() {

@@ -27,7 +27,7 @@ export class AppRds extends Construct {
   private createRdsInstance() {
     this.database = new rds.DatabaseInstance(this, 'MonolithDatabase', {
       engine: rds.DatabaseInstanceEngine.MYSQL,
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE2, ec2.InstanceSize.MICRO),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
       vpc: this.vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
