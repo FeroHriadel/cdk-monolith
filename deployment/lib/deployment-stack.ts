@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import { AppVpc } from './vpc/AppVpc';
 import { AppRds } from './rds/AppRds';
 import { AppBastion } from './bastion/AppBastion';
+import { AppServer } from './appServer/AppServer';
 
 
 
@@ -10,6 +11,7 @@ export class DeploymentStack extends cdk.Stack {
   private appVpc: AppVpc;
   private appBastion: AppBastion;
   private appRds: AppRds;
+  private appServer: AppServer;
 
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -22,6 +24,7 @@ export class DeploymentStack extends cdk.Stack {
     this.createVpc();
     this.createBastion();
     this.createRds();
+    this.createAppServer();
   }
 
   private createVpc() {
@@ -38,4 +41,9 @@ export class DeploymentStack extends cdk.Stack {
       bastionSecurityGroup: this.appBastion.bastionSecurityGroup
     });
   }
+
+  private createAppServer() {
+    this.appServer = new AppServer(this, 'AppServer', { vpc: this.appVpc.vpc });
+  }
+
 }

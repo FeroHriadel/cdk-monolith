@@ -7,3 +7,7 @@ export interface AppRdsProps {
   vpc: ec2.Vpc;
   bastionSecurityGroup: ec2.SecurityGroup;
 }
+
+export interface AppServerProps {
+  vpc: ec2.Vpc;
+}
