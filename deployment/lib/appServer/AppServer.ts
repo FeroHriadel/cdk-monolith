@@ -49,8 +49,8 @@ export class AppServer extends Construct {
       'cd cdk-monolith/client',
       'npm install',
       'npm run build-to-backend',
-      'cd ../api',
-      // add more
+      // build backend
+      //...
     );
 
     this.appServer = new ec2.Instance(this, 'MonolithAppServer', {
