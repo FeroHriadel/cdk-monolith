@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import { AppVpc } from './vpc/AppVpc';
 import { AppRds } from './rds/AppRds';
 import { AppBastion } from './bastion/AppBastion';
+import { RabbitMqServer } from './rabbitMq/RabbitMqServer';
 import { AppServer } from './appServer/AppServer';
 
 
@@ -12,6 +13,7 @@ export class DeploymentStack extends cdk.Stack {
   private appBastion: AppBastion;
   private appRds: AppRds;
   private appServer: AppServer;
+  private messageBroker: RabbitMqServer;
 
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -24,6 +26,7 @@ export class DeploymentStack extends cdk.Stack {
     this.createVpc();
     this.createBastion();
     this.createRds();
+    this.createMessageBroker();
     this.createAppServer();
   }
 
@@ -42,8 +45,14 @@ export class DeploymentStack extends cdk.Stack {
     });
   }
 
+  private createMessageBroker() {
+    this.messageBroker = new RabbitMqServer(this, 'MonolithRabbitMq', { vpc: this.appVpc.vpc });
+  }
+
   private createAppServer() {
     this.appServer = new AppServer(this, 'AppServer', { vpc: this.appVpc.vpc });
   }
+
+
 
 }

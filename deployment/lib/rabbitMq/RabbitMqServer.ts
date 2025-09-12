@@ -32,7 +32,7 @@ export class RabbitMqServer extends Construct {
       vpc: this.props.vpc,
       allowAllOutbound: true,
     });
-    // restrict to your IP for better security
+    // restrict to your IP & AppServer for better security in real-world scenario
     this.securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(5672), 'Allow AMQP');
     this.securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(15672), 'Allow RabbitMQ Management UI');
   }
