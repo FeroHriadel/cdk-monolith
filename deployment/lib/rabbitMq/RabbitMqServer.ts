@@ -4,6 +4,11 @@ import { RabbitMqProps } from '../types/types';
 
 
 
+const user = process.env.RABBITMQ_DEFAULT_USER!;
+const pass = process.env.RABBITMQ_DEFAULT_PASS!;
+
+
+
 export class RabbitMqServer extends Construct {
   public rabbitMq: ec2.Instance;
   public securityGroup: ec2.SecurityGroup;
@@ -35,20 +40,48 @@ export class RabbitMqServer extends Construct {
   private createInstance() {
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
+      // Update all packages
       'yum update -y',
-      'amazon-linux-extras install epel -y',
-      'yum install -y erlang socat',
-      'yum install -y wget',
-      'wget https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.13.1/rabbitmq-server-3.13.1-1.el8.noarch.rpm',
-      'yum install -y rabbitmq-server-3.13.1-1.el8.noarch.rpm',
-      'systemctl enable rabbitmq-server',
-      'systemctl start rabbitmq-server',
-      'rabbitmq-plugins enable rabbitmq_management',
-      'rabbitmqctl add_user devuser devpass',
-      'rabbitmqctl set_user_tags devuser administrator',
-      'rabbitmqctl set_permissions -p / devuser ".*" ".*" ".*"'
+      // Install Docker
+      'yum install -y docker',
+      // Start Docker service
+      'service docker start',
+      // Add ec2-user to the docker group so it can run docker without sudo
+      'usermod -a -G docker ec2-user',
+      // Download Docker Compose binary
+      'curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose',
+      // Make Docker Compose executable
+      'chmod +x /usr/local/bin/docker-compose',
+      // Create the docker-compose file for RabbitMQ with environment variables. Don't indent lines or yaml will be invalid!
+      `cat > /home/ec2-user/messageBroker.yaml <<EOF
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${user}
+      RABBITMQ_DEFAULT_PASS: ${pass}
+    networks:
+      - rabbitmq_net
+
+networks:
+  rabbitmq_net:
+    driver: bridge
+EOF
+`,
+      // Set ownership of the compose file to ec2-user
+      'chown ec2-user:ec2-user /home/ec2-user/messageBroker.yaml',
+      // Change to the home directory
+      'cd /home/ec2-user',
+      // Start RabbitMQ using Docker Compose in detached mode
+      'docker-compose -f messageBroker.yaml up -d'
     );
-    
+
     this.rabbitMq = new ec2.Instance(this, 'MonolithRabbitMq', {
       vpc: this.props.vpc,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
