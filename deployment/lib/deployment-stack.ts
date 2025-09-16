@@ -50,7 +50,11 @@ export class DeploymentStack extends cdk.Stack {
   }
 
   private createAppServer() {
-    this.appServer = new AppServer(this, 'AppServer', { vpc: this.appVpc.vpc });
+    this.appServer = new AppServer(this, 'AppServer', { 
+      vpc: this.appVpc.vpc,
+      appRds: this.appRds,
+      messageBroker: this.messageBroker
+    });
   }
 
 

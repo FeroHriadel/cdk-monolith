@@ -1,4 +1,6 @@
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import { RabbitMqServer } from '../rabbitMq/RabbitMqServer';
+import { AppRds } from '../rds/AppRds';
 
 
 
@@ -14,4 +16,6 @@ export interface RabbitMqProps {
 
 export interface AppServerProps {
   vpc: ec2.Vpc;
+  appRds: AppRds;
+  messageBroker: RabbitMqServer;
 }
