@@ -41,6 +41,13 @@ export class AppServer extends Construct {
       vpc: this.vpc,
       allowAllOutbound: true,
     });
+
+    // Allow SSH from anywhere (0.0.0.0/0). For production, use your IP instead.
+    this.appServerSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(22),
+      'Allow SSH access'
+    );
   }
 
   private createServer() {
