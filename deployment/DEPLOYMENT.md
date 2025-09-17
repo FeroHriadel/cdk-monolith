@@ -14,6 +14,9 @@
 ```
 ACCOUNT_ID=992913607133
 REGION=eu-central-1
+GITHUB_REPO=https://github.com/FeroHriadel/cdk-monolith
+RABBITMQ_DEFAULT_USER=produser
+RABBITMQ_DEFAULT_PASS=prodpass
 ```
 
 - $ cd deployment

@@ -1,6 +1,7 @@
 ## AWS MONOLITHIC DEPLOYMENT OF
 ### DOTNET + EF API
-### ANGULAR 
+### ANGULAR
+### AWS IaC
 
 Template includes:
 
@@ -31,5 +32,7 @@ ANGULAR:
 - Custom Directive (*appHasRole="['Admin', 'User']") has-role.directive.ts
 
 AWS DEPLOYMENT:
-- RDS + Bastion
+- RDS in private subnet + Bastion
+- RabbitMQ on EC2
+- Dotnet api + Angular Client on EC2 using Nginx reverse proxy
 

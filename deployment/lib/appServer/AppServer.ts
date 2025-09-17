@@ -78,6 +78,7 @@ export class AppServer extends Construct {
   }
 
   private installNginx(): string[] {
+    //keep the ugly indentation or it won't work
     return [
       'sudo yum install -y nginx',
       'sudo systemctl enable nginx',
@@ -128,8 +129,11 @@ EOF`,
   private buildClient(): string [] {
     return [
       'cd cdk-monolith/client',
-      'npm install',
-      'npm run build-to-backend -y'
+      // my version of ng asks stupid questions that need manual input (y/N), the lines below should get rid of that
+      'sudo npm install -g @angular/cli > /dev/null',
+      'echo no | npx ng completion',
+      'NG_CLI_ANALYTICS=false npm install',
+      'NG_CLI_ANALYTICS=false npm run build-to-backend'
     ];
   }
 
