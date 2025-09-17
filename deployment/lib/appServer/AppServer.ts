@@ -55,7 +55,7 @@ export class AppServer extends Construct {
       ...this.cloneRepo(),
       ...this.buildClient(),
       ...this.setupAppsettingsJson(),
-      this.startApi(),
+      ...this.startApi(),
     );
 
     this.appServer = new ec2.Instance(this, 'MonolithAppServer', {
@@ -175,8 +175,14 @@ EOF`,
     ];
   }
 
-  private startApi(): string {
-    return 'nohup dotnet run --urls "http://localhost:5000" > /dev/null 2>&1 &';
+  private startApi(): string[] {
+    return [
+      'nohup dotnet run --urls "http://localhost:5000" > /dev/null 2>&1 &',
+      // check if things are running
+      'sudo systemctl status nginx',
+      'sudo lsof -i :80',
+      'sudo lsof -i :5000',
+    ];
   }
 
 }
