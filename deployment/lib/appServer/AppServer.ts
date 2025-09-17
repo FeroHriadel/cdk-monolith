@@ -64,6 +64,7 @@ export class AppServer extends Construct {
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
       vpc: this.vpc,
       securityGroup: this.appServerSecurityGroup,
+      keyName: 'MonolithBastionKeyPair',
       userData: userData,
     });
     // No ingress rules for now (add ALB rule later, when ALB is created)
@@ -177,6 +178,12 @@ EOF`,
 
   private startApi(): string[] {
     return [
+      // install entity framework tool and update database
+      'dotnet tool install --global dotnet-ef --version 8.0.4',
+      'export PATH="$PATH:/home/ec2-user/.dotnet/tools"',
+      'cd /home/ec2-user/cdk-monolith/api',
+      'dotnet ef database update',
+      // run dotnet app
       'nohup dotnet run --urls "http://localhost:5000" > /dev/null 2>&1 &',
       // check if things are running
       'sudo systemctl status nginx',

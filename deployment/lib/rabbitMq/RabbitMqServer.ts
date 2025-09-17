@@ -88,6 +88,7 @@ EOF
       machineImage: ec2.MachineImage.latestAmazonLinux2(),
       securityGroup: this.securityGroup,
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      keyName: 'MonolithBastionKeyPair',
       userData: userData,
     });
   }
