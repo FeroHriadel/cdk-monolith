@@ -5,16 +5,18 @@ using Microsoft.Extensions.FileProviders;
 
 
 
+// init app builder
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAppServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 
-
+// init app
 var app = builder.Build();
+
+// middleware
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(policy =>
   policy
-  // .AllowAnyOrigin()
   .WithOrigins("http://localhost:4200")
   .AllowAnyMethod()
   .AllowAnyHeader()
@@ -22,31 +24,28 @@ app.UseCors(policy =>
 );
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
-app.UseStaticFiles(); // Serve static files from wwwroot
-// Serve Angular app from wwwroot/browser
-app.UseDefaultFiles(new DefaultFilesOptions {
+
+// Static Files - Correct order: UseDefaultFiles BEFORE UseStaticFiles
+app.UseDefaultFiles(new DefaultFilesOptions { // Maps "/" to "wwwroot/browser/index.html"
     FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "browser")
     ),
     RequestPath = ""
 });
-app.UseStaticFiles(new StaticFileOptions
+app.UseStaticFiles(); // Default wwwroot static files (images...)
+
+app.UseStaticFiles(new StaticFileOptions // Serve Angular app from wwwroot/browser
 {
   FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "browser")
     ),
   RequestPath = ""
 });
-// Redirect all non-API, non-static requests to Angular index.html
-app.Use(async (context, next) =>
-{
-    if (!context.Request.Path.StartsWithSegments("/api") &&
-        !context.Request.Path.StartsWithSegments("/images") &&
-        !Path.HasExtension(context.Request.Path.Value))
-    {
-        context.Request.Path = "/index.html";
-    }
-    await next();
-});
+
+// Api routes
+app.MapControllers();
+
+// SPA Fallback - Must be last - serves Angular app for unmatched routes
+app.MapFallbackToFile("/browser/index.html");
+
 app.Run();

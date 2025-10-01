@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  angular-builder:
+    image: node:22-alpine
+    # Set working directory inside container to /app/client (maps to your local client folder)
+    working_dir: /app/client
+    volumes:
+      # Map parent directory (cdkMonolith) to /app in container
+      # This allows build output to ../api/wwwroot to save to your local drive
+      - ..:/app
+      # Prevent local node_modules from interfering with container's version
+      - /app/client/node_modules
+    environment:
+      # Disable Angular CLI analytics to avoid prompts during build
+      - NG_CLI_ANALYTICS=false
+    command: >
+      sh -c "
+        echo 'Installing dependencies...' &&
+        npm install &&
+        echo 'Installing Angular CLI...' &&
+        npm install -g @angular/cli &&
+        echo 'Building Angular app...' &&
+        npm run build-to-backend &&
+        echo 'Build completed successfully!'
+      "
+    # Container stops after build completes (doesn't restart on failure)
+    restart: "no"
+
+    # Usage: docker-compose -f client.yaml up
+    # Build output will be saved to your local api/wwwroot folder
