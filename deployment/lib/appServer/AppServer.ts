@@ -42,18 +42,14 @@ export class AppServer extends Construct {
     this.updateYum(userData);
     this.installGit(userData);
     this.installDocker(userData);
+    this.cloneRepo(userData);
+    this.createAppYaml(userData);
+    this.runApp(userData);
     return userData;
   }
 
   private updateYum(userData: ec2.UserData): void {
     userData.addCommands('yum update -y');
-  }
-
-  private installGit(userData: ec2.UserData): void {
-    userData.addCommands(
-      'echo "Installing Git..."',
-      'yum install -y git',
-    );
   }
 
   private installDocker(userData: ec2.UserData): void {
@@ -66,6 +62,116 @@ export class AppServer extends Construct {
       'echo "Installing Docker Compose..."',
       'curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose',
       'chmod +x /usr/local/bin/docker-compose',
+    );
+  }
+
+  private installGit(userData: ec2.UserData): void {
+    userData.addCommands(
+      'echo "Installing Git..."',
+      'yum install -y git',
+    );
+  }
+
+  private cloneRepo(userData: ec2.UserData): void {
+    userData.addCommands(
+      'echo "Cloning repository..."',
+      `cd /home/ec2-user`,
+      `git clone ${GITHUB_REPO} app`,
+      'chown -R ec2-user:ec2-user /home/ec2-user/app',
+      'echo "Repository cloned successfully"'
+    );
+  }
+
+  private createAppYaml(userData: ec2.UserData): void {
+    userData.addCommands(
+      'echo "Creating production app.yaml..."',
+      'cd /home/ec2-user/app/api',
+      'cat > prodApp.yaml << \'EOF\'',
+      'services:',
+      '  prod-app:',
+      '    image: mcr.microsoft.com/dotnet/sdk:8.0',
+        '    working_dir: /app/api',
+      '    volumes:',
+      '      - ..:/app',
+      '    ports:',
+      '      - "80:80"',
+      '    environment:',
+      '      - ASPNETCORE_ENVIRONMENT=Production',
+      '      - ASPNETCORE_URLS=http://0.0.0.0:80',
+      '      - ASPNETCORE_HTTP_PORTS=80',
+      '      - ASPNETCORE_HTTPS_PORTS=',
+      `      - ConnectionStrings__DefaultConnection=Server=${this.appRds.database.instanceEndpoint.hostname};Port=${this.appRds.database.instanceEndpoint.port};Database=${this.appRds.database.instanceIdentifier};User=admin;Password={{resolve:secretsmanager:${this.appRds.database.secret!.secretArn}:SecretString:password}};`,
+      `      - RabbitMQ__Host=${this.messageBroker.rabbitMq.instancePrivateIp}`,
+      '      - RabbitMQ__Port=5672',
+      `      - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}`,
+      `      - RabbitMQ__Password=${RABBITMQ_DEFAULT_PASS}`,
+      '      - RabbitMQ__Queue=production-queue',
+      '    command: >',
+      '      bash -c "',
+      '        ### Install Node.js 22',
+      '        echo \'Installing Node.js 22...\' &&',
+      '        curl -fsSL https://deb.nodesource.com/setup_22.x | bash - &&',
+      '        apt-get update && apt-get install -y nodejs &&',
+      '        ',
+      '        ### Remove old Angular and npm cache (else the angular build fails)',
+      '        echo \'Cleaning npm cache and directories...\' &&',
+      '        npm cache clean --force &&',
+      '        rm -rf /usr/lib/node_modules/@angular* &&',
+      '        rm -rf /root/.npm &&',
+      '        ',
+      '        ### Install Angular dependencies and build UI',
+      '        echo \'Building Angular UI...\' &&',
+      '        cd /app/client &&',
+      '        npm install &&',
+      '        echo \'Installing Angular CLI globally...\' &&',
+      '        npm install -g @angular/cli --force &&',
+      '        npm run build-to-backend &&',
+      '        ',
+      '        ### Build .NET API',
+      '        echo \'Building .NET API...\' &&',
+      '        cd /app/api &&',
+      '        dotnet restore &&',
+      '        ',
+      '        ### Install Entity Framework & set it to PATH',
+      '        echo \'Installing Entity Framework tools...\' &&',
+      '        dotnet tool install --global dotnet-ef --version 8.0.4 &&',
+      '        export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/dotnet:/root/.dotnet/tools &&',
+      '        ',
+      '        ### Verify installations',
+      '        echo \'Verifying dotnet and EF tools...\' &&',
+      '        which dotnet &&',
+      '        which dotnet-ef &&',
+      '        dotnet --version &&',
+      '        ',
+      '        ### Initialize database through EF',
+      '        echo \'Initializing database...\' &&',
+      '        dotnet ef database update &&',
+      '        ',
+      '        ### Start the entire app',
+      '        echo \'Starting production server on port 80...\' &&',
+      '        dotnet run --configuration Release --urls=http://0.0.0.0:80',
+      '      "',
+      '    restart: unless-stopped',
+      '    networks:',
+      '      - app-network',
+      '',
+      'networks:',
+      '  app-network:',
+      '    driver: bridge',
+      'EOF',
+      'chown ec2-user:ec2-user prodApp.yaml',
+      'chmod 644 prodApp.yaml',
+      'echo "Production app.yaml created successfully"'
+    );
+  }
+
+  private runApp(userData: ec2.UserData): void {
+    userData.addCommands(
+      'echo "Starting production application..."',
+      'cd /home/ec2-user/app/api',
+      'sudo -u ec2-user docker-compose -f prodApp.yaml up -d',
+      'echo "Production application started successfully"',
+      'echo "Application is running on port 80"'
     );
   }
 
@@ -100,5 +206,7 @@ export class AppServer extends Construct {
       userData: this.createUserData(),
     });
   }
+
+
 
 }
