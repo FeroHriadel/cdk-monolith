@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { AppVpc } from './vpc/AppVpc';
 import { AppRds } from './rds/AppRds';
@@ -28,6 +29,7 @@ export class DeploymentStack extends cdk.Stack {
     this.createRds();
     this.createMessageBroker();
     this.createAppServer();
+    this.allowAppServerInRDS(); // Allow AppServer to connect to RDS after both are created
   }
 
   private createVpc() {
@@ -57,6 +59,14 @@ export class DeploymentStack extends cdk.Stack {
     });
   }
 
+  private allowAppServerInRDS() {
+    // Add ingress rule to RDS security group to allow connections from AppServer
+    this.appRds.database.connections.securityGroups[0].addIngressRule(
+      this.appServer.appServerSecurityGroup,
+      ec2.Port.tcp(3306),
+      'Allow MySQL access from App Server'
+    );
+  }
 
 
 }

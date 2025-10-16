@@ -19,19 +19,37 @@ RABBITMQ_DEFAULT_USER=produser
 RABBITMQ_DEFAULT_PASS=prodpass
 ```
 
-- $ cd deployment
-- $ npm i
-- $ cdk bootstrap
+`cd deployment`
+`npm i`
+`cdk bootstrap`
 
 
 ## MANUAL STEPS
-- Create a key-pair before deploying the bastion host, either via AWS Console or AWS CLI. Like this: $ aws ec2 create-key-pair --key-name MonolithBastionKeyPair --region eu-central-1
+- Create a key-pair before deploying the bastion host, either via AWS Console or AWS CLI. Like this: `aws ec2 create-key-pair --key-name MonolithBastionKeyPair --region eu-central-1`
 - Keep the name MonolithBastionKeyPair - it's hardcoded in /lib/bastion/AppBastion.ts - or change it there.
 - Save the keypair in a file. If you copied the output of the $ aws ec2 create-key-pair... command then you just need the part from (including) -----BEGIN RSA PRIVATE KEY----- to (including) -----END RSA PRIVATE KEY-----. If you have \n linebreaks there, remove them and put an actual line break (Enter key) in their place
 
 
 ### DEPLOY
-- $ cdk deploy
+`cdk deploy`
+
+Optional: Once deployed check what's going on like this:
+
+Get AppServer IPv4:
+`aws ec2 describe-instances --region eu-central-1 --filters "Name=tag:Name,Values=MonolithDeploymentStack/AppServer/MonolithAppServer" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text`
+
+Connect to AppServer:
+`cd c:\Users\ferdi\Desktop\Dev\AWS\cdkMonolith\deployment; ssh -o "StrictHostKeyChecking=no" -i "BastionKeyPair.pem" ec2-user@[IP_ADDRESS]`
+
+Check docker:
+`docker ps -a`
+
+Check if .yaml built ok:
+`cd app/api`
+`ls -la prodApp.yaml`
+`sudo /usr/local/bin/docker-compose -f prodApp.yaml logs --tail=20`
+
+Wait a couple of minutes and then run `sudo /usr/local/bin/docker-compose -f prodApp.yaml logs --tail=100`
 
 
 ### CONNECT TO BASTION (FROM WINDOWS 11) & DB

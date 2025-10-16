@@ -169,7 +169,7 @@ export class AppServer extends Construct {
     userData.addCommands(
       'echo "Starting production application..."',
       'cd /home/ec2-user/app/api',
-      'sudo -u ec2-user docker-compose -f prodApp.yaml up -d',
+      'sudo -u ec2-user /usr/local/bin/docker-compose -f prodApp.yaml up -d',
       'echo "Production application started successfully"',
       'echo "Application is running on port 80"'
     );
