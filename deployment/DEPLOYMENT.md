@@ -49,6 +49,13 @@ Check if .yaml built ok:
 `ls -la prodApp.yaml`
 `sudo /usr/local/bin/docker-compose -f prodApp.yaml logs --tail=20`
 
+Check if appServer can connect to RDS:
+Get RDS endpoint:
+`aws rds describe-db-instances --region eu-central-1 --query "DBInstances[0].Endpoint.Address" --output text`
+
+Test connectivity:
+`timeout 10 bash -c "</dev/tcp/[RDS-ENDPOINT]/3306" && echo "Port 3306 is open" || echo "Port 3306 is closed/unreachable"`
+
 Wait a couple of minutes and then run `sudo /usr/local/bin/docker-compose -f prodApp.yaml logs --tail=100`
 
 

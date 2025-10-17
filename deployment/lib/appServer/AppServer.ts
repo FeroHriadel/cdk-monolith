@@ -1,5 +1,6 @@
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { AppServerProps } from '../types/types';
 import * as dotenv from 'dotenv';
 import { AppRds } from '../rds/AppRds';
@@ -17,6 +18,7 @@ const RABBITMQ_DEFAULT_PASS = process.env.RABBITMQ_DEFAULT_PASS || 'NO_PASS_PROV
 export class AppServer extends Construct {
   public appServer: ec2.Instance;
   public appServerSecurityGroup: ec2.SecurityGroup;
+  private appServerRole: iam.Role;
   private vpc: ec2.Vpc;
   private appRds: AppRds;
   private messageBroker: RabbitMqServer;
@@ -32,9 +34,22 @@ export class AppServer extends Construct {
 
 
   private init() {
+    this.createIamRole();
     this.createUserData();
     this.createSecurityGroup();
     this.createServer();
+  }
+
+  private createIamRole(): void {
+    this.appServerRole = new iam.Role(this, 'AppServerRole', {
+      assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')
+      ]
+    });
+
+    // Grant permission to read the RDS secret
+    this.appRds.database.secret!.grantRead(this.appServerRole);
   }
 
   private createUserData(): ec2.UserData {
@@ -100,7 +115,7 @@ export class AppServer extends Construct {
       '      - ASPNETCORE_URLS=http://0.0.0.0:80',
       '      - ASPNETCORE_HTTP_PORTS=80',
       '      - ASPNETCORE_HTTPS_PORTS=',
-      `      - ConnectionStrings__DefaultConnection=Server=${this.appRds.database.instanceEndpoint.hostname};Port=${this.appRds.database.instanceEndpoint.port};Database=${this.appRds.database.instanceIdentifier};User=admin;Password={{resolve:secretsmanager:${this.appRds.database.secret!.secretArn}:SecretString:password}};`,
+      `      - ConnectionStrings__DefaultConnection=Server=${this.appRds.database.instanceEndpoint.hostname};Port=${this.appRds.database.instanceEndpoint.port};Database=${this.appRds.database.instanceIdentifier};User=admin;Password=PLACEHOLDER_PASSWORD;`,
       `      - RabbitMQ__Host=${this.messageBroker.rabbitMq.instancePrivateIp}`,
       '      - RabbitMQ__Port=5672',
       `      - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}`,
@@ -169,6 +184,20 @@ export class AppServer extends Construct {
     userData.addCommands(
       'echo "Starting production application..."',
       'cd /home/ec2-user/app/api',
+      '',
+      '# Get the database password from AWS Secrets Manager',
+      `DB_PASSWORD=$(aws secretsmanager get-secret-value --secret-id ${this.appRds.database.secret!.secretArn} --region eu-central-1 --query SecretString --output text | python3 -c "import sys, json; print(json.load(sys.stdin)['password'])")`,
+      '',
+      '# Replace the placeholder password in prodApp.yaml',
+      'python3 -c "',
+      'import os',
+      'with open(\"prodApp.yaml\", \"r\") as f:',
+      '    content = f.read()',
+      'content = content.replace(\"PLACEHOLDER_PASSWORD\", os.environ[\"DB_PASSWORD\"])',
+      'with open(\"prodApp.yaml\", \"w\") as f:',
+      '    f.write(content)',
+      '" DB_PASSWORD="$DB_PASSWORD"',
+      '',
       'sudo -u ec2-user /usr/local/bin/docker-compose -f prodApp.yaml up -d',
       'echo "Production application started successfully"',
       'echo "Application is running on port 80"'
@@ -197,12 +226,13 @@ export class AppServer extends Construct {
 
   private createServer() {
     this.appServer = new ec2.Instance(this, 'MonolithAppServer', {
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL), // Upgraded from MICRO to SMALL - MICRO can't handle Docker workloads reliably
       machineImage: ec2.MachineImage.latestAmazonLinux2(),
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
       vpc: this.vpc,
       securityGroup: this.appServerSecurityGroup,
       keyName: 'MonolithBastionKeyPair',
+      role: this.appServerRole,
       userData: this.createUserData(),
     });
   }
