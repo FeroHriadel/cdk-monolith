@@ -47,9 +47,16 @@ export class AppServer extends Construct {
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')
       ]
     });
-
-    // Grant permission to read the RDS secret
+    //grant permission to read the RDS secret
     this.appRds.database.secret!.grantRead(this.appServerRole);
+    //add explicit Secrets Manager permissions as backup
+    this.appServerRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'secretsmanager:GetSecretValue'
+      ],
+      resources: [this.appRds.database.secret!.secretArn]
+    }));
   }
 
   private createUserData(): ec2.UserData {
@@ -190,12 +197,14 @@ export class AppServer extends Construct {
       '',
       '# Replace the placeholder password in prodApp.yaml',
       'python3 -c "',
-      'import os',
+      'import os, sys',
+      'password = os.environ.get(\"DB_PASSWORD\", \"\")',
       'with open(\"prodApp.yaml\", \"r\") as f:',
       '    content = f.read()',
-      'content = content.replace(\"PLACEHOLDER_PASSWORD\", os.environ[\"DB_PASSWORD\"])',
+      'content = content.replace(\"PLACEHOLDER_PASSWORD\", password)',
       'with open(\"prodApp.yaml\", \"w\") as f:',
       '    f.write(content)',
+      'print(f\"Password replacement completed. Length: {len(password)}\")',
       '" DB_PASSWORD="$DB_PASSWORD"',
       '',
       'sudo -u ec2-user /usr/local/bin/docker-compose -f prodApp.yaml up -d',
